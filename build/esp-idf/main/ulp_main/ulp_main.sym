@@ -1,0 +1,9 @@
+charging B 00000084 
+entry T 00000000 
+exit T 00000064 
+high_thr B 0000008c 
+last_result B 00000094 
+loop T 00000000 
+low_thr B 00000088 
+sample_counter B 00000090 
+wake_up T 0000006c 

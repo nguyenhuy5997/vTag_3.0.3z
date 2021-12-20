@@ -1,0 +1,41 @@
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+ram              0x00000000         0x00000100         rw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD CMakeFiles/ulp_main.dir/blink.ulp.S.obj
+
+.text           0x00000000       0x84 load address 0x0000000c
+ *(.text)
+ .text          0x00000000       0x84 CMakeFiles/ulp_main.dir/blink.ulp.S.obj
+                0x00000000                loop
+                0x00000000                entry
+                0x00000064                exit
+                0x0000006c                wake_up
+
+.data           0x00000084        0x0 load address 0x00000090
+                0x00000084                . = ALIGN (0x4)
+ *(.data)
+ .data          0x00000084        0x0 CMakeFiles/ulp_main.dir/blink.ulp.S.obj
+
+.bss            0x00000084       0x14 load address 0x00000090
+                0x00000084                . = ALIGN (0x4)
+ *(.bss)
+ .bss           0x00000084       0x14 CMakeFiles/ulp_main.dir/blink.ulp.S.obj
+                0x00000084                charging
+                0x00000088                low_thr
+                0x0000008c                high_thr
+                0x00000090                sample_counter
+                0x00000094                last_result
+
+.header         0x00000098        0xc load address 0x00000000
+                0x00000098        0x4 LONG 0x706c75
+                0x0000009c        0x2 SHORT 0xc LOADADDR (.text)
+                0x0000009e        0x2 SHORT 0x84 SIZEOF (.text)
+                0x000000a0        0x2 SHORT 0x0 SIZEOF (.data)
+                0x000000a2        0x2 SHORT 0x14 SIZEOF (.bss)
+OUTPUT(ulp_main elf32-esp32ulp)

@@ -1,0 +1,13 @@
+# Target labels
+ ulp_main
+# Source files and their labels
+D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/CMakeFiles/ulp_main
+D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/CMakeFiles/ulp_main.rule
+D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/CMakeFiles/ulp_main-complete.rule
+D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-build.rule
+D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-configure.rule
+D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-download.rule
+D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-install.rule
+D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-mkdir.rule
+D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-patch.rule
+D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-update.rule
