@@ -1440,8 +1440,8 @@ void ESP32_GPIO_Input_Init(void)
 	gpio_config(&io_conf);
 
 	gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
-	xTaskCreate(gpio_task_example, "gpio_task_example", 4096, NULL, 10, NULL);
-	xTaskCreate(button_processing_task, "button_processing_task", 4096, NULL, 10, NULL);
+	xTaskCreate(gpio_task_example, "gpio_task_example", 4096, NULL, 6, NULL);
+	xTaskCreate(button_processing_task, "button_processing_task", 4096, NULL, 6, NULL);
 	gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
 	gpio_isr_handler_add(BUTTON, gpio_isr_handler, (void*) BUTTON);
 	gpio_isr_handler_add(CHARGE, gpio_isr_handler, (void*) CHARGE);
@@ -4700,8 +4700,8 @@ void test_main_task(void *arg)
 		if(Flag_GPS_ok == false)
 		{
 			GPS_Operation_Thread();
-			vTaskDelete(gps_scan_task_handle);
-			vTaskDelete(gps_processing_task_handle);
+//			vTaskDelete(gps_scan_task_handle);
+//			vTaskDelete(gps_processing_task_handle);
 
 			gpio_set_level(LED_2, 0);
 			//vTaskDelete(led_indicator_handle);
@@ -4850,7 +4850,6 @@ void test_main_task(void *arg)
 			vTaskDelete(check_timeout_task_handle);
 			while(Flag_GPS_ok == true && Flag_NB_ok == true && Flag_GSM_ok == true)
 			{
-				esp_task_wdt_reset();
 				gpio_set_level(LED_1, 1);
 				vTaskDelay(200 / RTOS_TICK_PERIOD_MS);
 				gpio_set_level(LED_1, 0);
@@ -4862,16 +4861,15 @@ void test_main_task(void *arg)
 			if(retry < 2)
 			{
 				retry++;
-				xTaskCreatePinnedToCore(gps_scan_task, "gps scan", 4096*2, NULL, CHECKTIMEOUT_TASK_PRIO, &gps_scan_task_handle, tskNO_AFFINITY);
-				xTaskCreatePinnedToCore(gps_processing_task, "gps processing", 4096*2, NULL, CHECKTIMEOUT_TASK_PRIO, &gps_processing_task_handle, tskNO_AFFINITY);
+//				xTaskCreatePinnedToCore(gps_scan_task, "gps scan", 4096*2, NULL, CHECKTIMEOUT_TASK_PRIO, &gps_scan_task_handle, tskNO_AFFINITY);
+//				xTaskCreatePinnedToCore(gps_processing_task, "gps processing", 4096*2, NULL, CHECKTIMEOUT_TASK_PRIO, &gps_processing_task_handle, tskNO_AFFINITY);
 				goto CYCLE_START;
 			}
 			else
 			{
-				vTaskDelete(check_timeout_task_handle);
+//				vTaskDelete(check_timeout_task_handle);
 				while(Flag_GPS_ok == false || Flag_NB_ok == false || Flag_GSM_ok == false)
 				{
-					esp_task_wdt_reset();
 					gpio_set_level(LED_2, 1);
 					vTaskDelay(200 / RTOS_TICK_PERIOD_MS);
 					gpio_set_level(LED_2, 0);
@@ -4902,11 +4900,9 @@ void app_main(void)
 	xMutex_LED = xSemaphoreCreateMutex();
 	ESP32_GPIO_Output_Init();
 	ESP32_GPIO_Input_Init();
-
 	ESP_LOGI(TAG, "VTAG ESP32 Application Running x\r\n");
 
 	// Mount FAT flash
-//	MountingFATFlash();
 	mountSPIFFS();
 
 	// Read device ID

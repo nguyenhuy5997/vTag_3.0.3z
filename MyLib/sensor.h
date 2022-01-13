@@ -19,6 +19,7 @@
 #include "freertos/queue.h"
 #include "esp_sleep.h"
 
+#define TAG_SENSOR "SENSOR"
 /*************I2C DEFINE*****************/
 #define _I2C_NUMBER(num) I2C_NUM_##num
 #define I2C_NUMBER(num) _I2C_NUMBER(num)

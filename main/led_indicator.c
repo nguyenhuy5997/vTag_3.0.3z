@@ -17,8 +17,10 @@ void LED_TurnOn()
 		for(int i = 0; i < 3; i++)
 		{
 			gpio_set_level(LED_1, 1);
+//			gpio_set_level(LED_2, 1);
 			vTaskDelay(150/portTICK_PERIOD_MS);
 			gpio_set_level(LED_1, 0);
+//			gpio_set_level(LED_2, 0);
 			vTaskDelay(150/portTICK_PERIOD_MS);
 		}
 	}
