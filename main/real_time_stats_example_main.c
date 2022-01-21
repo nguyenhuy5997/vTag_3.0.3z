@@ -72,7 +72,7 @@ const char *TAG = "VTAG_ESP32";
 #define	ENABLE_SLEEP_AT_STARTUP 0
 #define BU_Arr_Max_Num 		 	15
 
-#define VOFF_SET	60
+#define VOFF_SET	50
 #define THRESHOLD   3970
 char MQTT_SubMessage[200] = "";
 
@@ -754,9 +754,9 @@ void Delete_Tasks(void)
 
 void PreOperationInit(void)
 {
-	Flag_Wait_Exit = false;
-	ATC_SendATCommand("AT+CFUN=1\r\n", "OK", 1000, 2, ATResponse_Callback);
-	WaitandExitLoop(&Flag_Wait_Exit);
+//	Flag_Wait_Exit = false;
+//	ATC_SendATCommand("AT+CFUN=1\r\n", "OK", 1000, 2, ATResponse_Callback);
+//	WaitandExitLoop(&Flag_Wait_Exit);
 
 	vTaskDelay(200/RTOS_TICK_PERIOD_MS);
 
@@ -788,9 +788,9 @@ void PreOperationInit(void)
 	ATC_SendATCommand("AT+CBAND=\"ALL_MODE\"\r\n", "OK", 1000, 2, ATResponse_Callback);
 	WaitandExitLoop(&Flag_Wait_Exit);
 
-	Flag_Wait_Exit = false;
-	ATC_SendATCommand("AT+CFUN=0\r\n", "OK", 1000, 2, ATResponse_Callback);
-	WaitandExitLoop(&Flag_Wait_Exit);
+//	Flag_Wait_Exit = false;
+//	ATC_SendATCommand("AT+CFUN=0\r\n", "OK", 1000, 2, ATResponse_Callback);
+//	WaitandExitLoop(&Flag_Wait_Exit);
 }
 
 void BackUp_UnsentMessage(VTAG_MessageType Mess_Type)
@@ -1046,6 +1046,18 @@ void BackUp_UnsentMessage(VTAG_MessageType Mess_Type)
 		ESP_LOGE(TAG, "Backup data list:\r\n");
 		for(int i = 0; i < Backup_Array_Counter; i++)
 		{
+//			if(strstr(Backup_Array_Counter[i],"re"))
+//			{
+//				for(int j = 0; j < strlen(Backup_Array_Counter[i]); j++)
+//				{
+//					if(Backup_Array_Counter[i][j] == 'r' && Backup_Array_Counter[i][j+1] == 'e' && Backup_Array_Counter[i][j-1] == '"' && Backup_Array_Counter[i][j+2] == '"')
+//					{
+//						Backup_Array_Counter[i][j-2] = '}';
+//						Backup_Array_Counter[i][j-1] = 0;
+//						break;
+//					}
+//				}
+//			}
 			ESP_LOGW(TAG, "Data %d: %s\r\n", i, Location_Backup_Array[i]);
 		}
 
@@ -1165,7 +1177,7 @@ static void button_processing_task(void* arg)
 							if(strchr(Device_PairStatus,'P'))
 							{
 								ESP_LOGW(TAG,"Unpair device task\r\n");
-								//gpio_set_level(UART_SW, 1);
+//								gpio_set_level(UART_SW, 1);
 								Flag_Unpair_Task = true;
 								Flag_Unpair_led =  true;
 							}
@@ -1215,7 +1227,7 @@ static void button_processing_task(void* arg)
 						}
 						break;
 					case 1:
-						//gpio_set_level(UART_SW, 0);
+//						gpio_set_level(UART_SW, 0);
 						// Addded: Ext1_Wakeup_Pin != CHARGE condition
 						if(((esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0 && Flag_motion_detected == false) && Flag_mainthread_run == false && Ext1_Wakeup_Pin != CHARGE) || (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT1 && Flag_motion_detected == true && Flag_sos == false))
 						{
@@ -1680,19 +1692,16 @@ void MQTT_Location_Payload_Convert(void)
 		Bat_Wifi_Cell_Convert(Mqtt_TX_Str, Wifi_Buffer, VTAG_DeviceParameter.Bat_Level, MCC,VTAG_NetworkSignal.RSRP, VTAG_NetworkSignal.RSRQ, RSSI, cell_ID, LAC, MNC);
 		if(Flag_sos == 1)
 		{
-			printf("sos\r\n");
 			str_str(Mqtt_TX_Str,"DWFC", "DSOS");
 			Flag_sos = false;
 		}
 		else if(Flag_send_DASP == 1)
 		{
-			printf("asp\r\n");
 			str_str(Mqtt_TX_Str,"DWFC", "DASP");
 			Flag_send_DASP = false;
 		}
 		else if(Flag_send_DAST == 1)
 		{
-			printf("ast\r\n");
 			str_str(Mqtt_TX_Str,"DWFC", "DAST");
 			Flag_send_DAST = false;
 		}
@@ -4343,9 +4352,9 @@ void led_indicator(void *arg)
 				Flag_Cycle_Completed = true;
 				goto CYCLE_START;
 			}
-    		Flag_Wait_Exit = false;
-			ATC_SendATCommand("AT+CFUN=0\r\n", "OK", 3000, 5, ATResponse_Callback);
-			WaitandExitLoop(&Flag_Wait_Exit);
+//    		Flag_Wait_Exit = false;
+//			ATC_SendATCommand("AT+CFUN=0\r\n", "OK", 3000, 5, ATResponse_Callback);
+//			WaitandExitLoop(&Flag_Wait_Exit);
     		Check_battery();
     		//Disable the RTC WDT timer
     		rtc_wdt_disable();

@@ -66,6 +66,7 @@ static const char *TAG = "MQTT_EXAMPLE";
 extern void ESP32_Clock_Config(int Freq_Max, int Freq_Min, bool LighSleep_Select);
 bool Flag_cancel_timeout = false;
 bool step_get = false;
+bool flag_get_token = true;
 /*------------------------------------log_error_if_nonzero-------------------------------------------------*/
 static void log_error_if_nonzero(const char *message, int error_code)
 {
@@ -83,24 +84,22 @@ static void mqtt_event_handler_ack(void *handler_args, esp_event_base_t base, in
     switch ((esp_mqtt_event_id_t)event_id) {
 
     case MQTT_EVENT_CONNECTED:
-        ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED\r\n");
-        GetDeviceTimestamp();
+    	ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED\r\n");
 		memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
 		sprintf(MQTT_ID_Topic, "messages/%s/control", DeviceID_TW_Str);
-        msg_id = esp_mqtt_client_subscribe(client, MQTT_ID_Topic, 1);
-        ESP_LOGI(TAG, "subcribe to topic: %s\r\n", MQTT_ID_Topic);
-        break;
+		msg_id = esp_mqtt_client_subscribe(client, MQTT_ID_Topic, 1);
+		ESP_LOGI(TAG, "subcribe to topic: %s\r\n", MQTT_ID_Topic);
+		break;
 
     case MQTT_EVENT_DISCONNECTED:
         ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
         break;
 
     case MQTT_EVENT_SUBSCRIBED:
-		GetDeviceTimestamp();
-		memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
-		sprintf(MQTT_ID_Topic, "messages/%s/gps", DeviceID_TW_Str);
-		MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "GET", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, VTAG_DeviceParameter.Device_Timestamp, VTAG_Vesion, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
-		msg_id = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, 200, 1, 0);
+    	memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
+		sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
+		MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Vesion, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
+		msg_id = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, strlen(Mqtt_TX_Str), 1, 0);
         break;
 
     case MQTT_EVENT_UNSUBSCRIBED:
@@ -114,22 +113,6 @@ static void mqtt_event_handler_ack(void *handler_args, esp_event_base_t base, in
     case MQTT_EVENT_DATA:
         ESP_LOGI(TAG, "MQTT_EVENT_DATA\r\n");
         ESP_LOGI(TAG, "Data sub: %s\r\n", event->data);
-        //Flag_Fota = false;
-        JSON_Analyze(event->data, &VTAG_Configure_temp);
-        if(step_get == true)
-        {
-        	xTaskCreate(&check_update_task, "check_update_task",1024 * 8, NULL, 5, NULL);
-        	step_get = false;
-        }
-        else
-        {
-        	step_get = true;
-			GetDeviceTimestamp();
-			memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
-			sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
-			MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, VTAG_DeviceParameter.Device_Timestamp, VTAG_Vesion, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
-			msg_id = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, 200, 1, 0);
-        }
         break;
 
     case MQTT_EVENT_ERROR:
@@ -162,11 +145,10 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         break;
 
     case MQTT_EVENT_SUBSCRIBED:
-		GetDeviceTimestamp();
 		memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
 		sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
-		MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOSS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, VTAG_DeviceParameter.Device_Timestamp, VTAG_Version_next, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
-		msg_id = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, 200, 1, 0);
+		MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOSS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Version_next, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
+		msg_id = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, strlen(Mqtt_TX_Str), 1, 0);
         break;
 
     case MQTT_EVENT_UNSUBSCRIBED:
@@ -215,7 +197,7 @@ static void check_timeout(void *arg)
 static void mqtt_app_start(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-#ifdef SERVER_TEST
+#if SERVER_TEST
         .uri = "mqtt://203.113.138.18:4445",
 #else
 		.uri = "mqtt://171.244.133.251:1883",
@@ -231,7 +213,7 @@ static void mqtt_app_start(void)
 static void mqtt_app_start_ack(void)
 {
     esp_mqtt_client_config_t mqtt_cfg = {
-#ifdef SERVER_TEST
+#if SERVER_TEST
         .uri = "mqtt://203.113.138.18:4445",
 #else
 		.uri = "mqtt://171.244.133.251:1883",
@@ -268,8 +250,7 @@ void smartconfig_task(void *parm)
 			sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
 			MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Vesion, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
 			mqtt_app_start_ack();
-			//xTaskCreate(&advanced_ota_example_task, "advanced_ota_example_task",1024 * 8, NULL, 5, NULL);
-//			xTaskCreate(&check_update_task, "check_update_task",1024 * 8, NULL, 5, NULL);
+			xTaskCreate(&check_update_task, "check_update_task",1024 * 8, NULL, 5, NULL);
 			vTaskDelete(NULL);
 		}
 	}
@@ -376,11 +357,6 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
         case HTTP_EVENT_ON_HEADER:
             break;
         case HTTP_EVENT_ON_DATA:
-//            if (!esp_http_client_is_chunked_response(evt->client)) {
-//            	ESP_LOGI(TAG_wifi, "evt->data: %s\r\n",(char*)evt->data);
-//				strncpy(rcv_buffer, (char*)evt->data, evt->data_len);
-//				ESP_LOGI(TAG_wifi, "wait.....111111\r\n");
-//            }
             strncpy(rcv_buffer, (char*)evt->data, evt->data_len);
             break;
         case HTTP_EVENT_ON_FINISH:

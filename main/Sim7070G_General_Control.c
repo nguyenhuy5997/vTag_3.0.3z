@@ -136,11 +136,7 @@ void TurnOff7070G(void)
 		t_stop =  (uint64_t)round(rtc_time_get());
 		tp = 0;
 	}
-//	if(VTAG_Configure.Period*60 <= t_actived)
-//	{
-//		tp = VTAG_Configure.Period*60 - TrackingRuntime;
-//		t_stop = (uint64_t) round(rtc_time_get()/(146233*1.11489));
-//	}
+
 	ESP_LOGW(TAG, "tp: %d sec\r\n", tp);
 	if(180 > acc_counter)
 	{

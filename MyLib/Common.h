@@ -67,7 +67,8 @@ extern RTC_DATA_ATTR char VTAG_Version_next[10];
 #define CALIB_FACTOR	1.048
 #define BU_Arr_Max_Num 		 	15
 
-
+#define INNOWAY 0
+#define SERVER_TEST 0
 typedef enum
 {
     PAIR = 0,
@@ -202,7 +203,7 @@ typedef struct
 MQTTdataType_t MQTTdataType;
 
 //#define SERVER_TEST
-
+#if INNOWAY
 static ATC_List_t AT_MQTT_List[] =
 {
 #ifdef TEST_SERVER
@@ -213,7 +214,35 @@ static ATC_List_t AT_MQTT_List[] =
 	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
 	{"AT+SMCONF=\"CLEANSS\",1\r\n"},										// cleanssession flag
 #else
-#ifdef SERVER_TEST
+#if SERVER_TEST
+	{"AT+SMCONF=\"URL\",203.113.138.18,4445\r\n"},
+#else
+	{"AT+SMCONF=\"URL\",125.212.248.229,1883\r\n"}, 						// URL, port TCP {"AT+SMCONF=\"URL\",203.113.138.18,4445\r\n"},{"AT+SMCONF=\"URL\",171.244.133.251,1883\r\n"},
+#endif
+	{"AT+SMCONF=\"USERNAME\",\"vtag\"\r\n"},// username
+	{"AT+SMCONF=\"PASSWORD\",\"abMthkHU3UOZ7T5eICcGrVvjPbya17ER\"\r\n"},// pass
+	{"AT+SMCONF=\"CLIENTID\",\"8344\"\r\n"},// client id
+	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
+	{"AT+SMCONF=\"CLEANSS\",1\r\n"},		// cleanssession flag
+#endif
+	{"AT+CNACT=0,1\r\n"},
+	{"AT+SMCONN\r\n"},
+	{"AT+SMDISC\r\n"},
+	{"AT+CNACT=0,0\r\n"},
+	{"AT+CPSI?\r\n"},
+};
+#else
+static ATC_List_t AT_MQTT_List[] =
+{
+#ifdef TEST_SERVER
+	{"AT+SMCONF=\"URL\",52.57.206.96,1883\r\n"}, 					        // URL, port TCP
+	{"AT+SMCONF=\"USERNAME\",\"CHUNG97\"\r\n"}, 							// username
+	{"AT+SMCONF=\"PASSWORD\",\"TESTPASS\"\r\n"}, 							// pass
+	{"AT+SMCONF=\"CLIENTID\",\"TEST\"\r\n"},								// client id
+	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
+	{"AT+SMCONF=\"CLEANSS\",1\r\n"},										// cleanssession flag
+#else
+#if SERVER_TEST
 	{"AT+SMCONF=\"URL\",203.113.138.18,4445\r\n"},
 #else
 	{"AT+SMCONF=\"URL\",171.244.133.251,1883\r\n"}, 						// URL, port TCP {"AT+SMCONF=\"URL\",203.113.138.18,4445\r\n"},{"AT+SMCONF=\"URL\",171.244.133.251,1883\r\n"},
@@ -230,6 +259,7 @@ static ATC_List_t AT_MQTT_List[] =
 	{"AT+CNACT=0,0\r\n"},
 	{"AT+CPSI?\r\n"},
 };
+#endif
 char Mqtt_TX_Str[MQTT_TX_Str_Buf_Lenght];
 char MQTT_ID_Topic[75];
 
