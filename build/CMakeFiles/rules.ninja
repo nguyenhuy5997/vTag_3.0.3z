@@ -1580,7 +1580,7 @@ rule C_STATIC_LIBRARY_LINKER____idf_protocol_examples_common_
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = C:\Users\HAOHV6\.espressif\tools\cmake\3.20.3\bin\cmake.exe --regenerate-during-build -SD:\Eclipse\VTAG_ESP32_7070G_V3_GET_synctime -BD:\Eclipse\VTAG_ESP32_7070G_V3_GET_synctime\build
+  command = C:\Users\HAOHV6\.espressif\tools\cmake\3.20.3\bin\cmake.exe --regenerate-during-build -SD:\Eclipse\VTAG_ESP32_7070G_V3_S3.0.9 -BD:\Eclipse\VTAG_ESP32_7070G_V3_S3.0.9\build
   description = Re-running CMake...
   generator = 1
 

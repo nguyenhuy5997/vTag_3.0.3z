@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/bootloader/esp-idf/cmake_install.cmake")
+  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/cmake_install.cmake")
 
 endif()
 
@@ -51,5 +51,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/bootloader/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

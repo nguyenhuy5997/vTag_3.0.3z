@@ -1,4 +1,4 @@
-/* * Data converted from D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/server_certs/ca_cert.pem
+/* * Data converted from D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/server_certs/ca_cert.pem
  * (null byte appended)
  */
 .data

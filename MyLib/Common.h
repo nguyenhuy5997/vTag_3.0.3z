@@ -46,11 +46,15 @@
 #define ECHO_UART_BAUD_RATE     115200
 #define uart_rx_task_STACK_SIZE    2048
 
+#define ACCURACY_THR			0
+#define AP_COUNT_THR			0
+
 #define BUF_SIZE (2048)
 
 #define NB_IoT					 	0
 #define GSM							1
-#define Both_NB_GSM					2
+#define Both_NB_GSM					51
+#define MQTT_SUB_TIMEOUT			100
 
 char Network_Type_Str[10];
 
@@ -67,8 +71,22 @@ extern RTC_DATA_ATTR char VTAG_Version_next[10];
 #define CALIB_FACTOR	1.048
 #define BU_Arr_Max_Num 		 	15
 
-#define INNOWAY 0
+#define INNOWAY 	1
 #define SERVER_TEST 0
+typedef enum
+{
+	NORMAL = 0,
+	CFUN,
+	SCAN_NET,
+	REG_NET,
+	CHECK_ACT_NET,
+	ACT_NET,
+	MQTT_CON,
+	MQTT_SUB,
+	MQTT_PUB,
+	MQTT_SUB_REC,
+} BU_reason;
+
 typedef enum
 {
     PAIR = 0,
@@ -97,6 +115,20 @@ typedef enum
 	B_UNPAIR_TEST = 6,
 } Button_Task;
 
+typedef enum
+{
+	MESS_NONE = 0,
+	MESS_UNPAIR = 1,
+	MESS_PAIR = 2,
+	MESS_DOF = 4,
+	MESS_DCF = 5,
+	MESS_DOFA = 6,
+} ACK_MESS;
+typedef enum
+{
+	WAIT_ACK = 0,
+	ACK_DONE = 1,
+};
 typedef struct _CFG
 {
 	int Mode 	;
@@ -173,7 +205,7 @@ typedef void (*SIMCOM_SendATCallBack_t)(SIMCOM_ResponseEvent_t event, void *Resp
 // Device ID
 //#define Device_ID_TW 			"c6118176-b3a9-4c70-8a46-2685edb35d57"									// TW_1
 //#define Device_ID_TW			"ee5db00a-b105-49cf-aeab-c4d0a34bc7e9"									// TW_5
-#define Device_ID_TW			"902d3031-e3ad-4961-b46d-391d3bbb68e3"									// TW_KIT
+#define Device_ID_TW			"MAN02ND00086"									// TW_KIT
 
 #define MQTT_TX_Str_Buf_Lenght	500
 
@@ -202,28 +234,29 @@ typedef struct
 
 MQTTdataType_t MQTTdataType;
 
-//#define SERVER_TEST
-#if INNOWAY
 static ATC_List_t AT_MQTT_List[] =
 {
-#ifdef TEST_SERVER
-	{"AT+SMCONF=\"URL\",52.57.206.96,1883\r\n"}, 					        // URL, port TCP
+#if SERVER_TEST
+	{"AT+SMCONF=\"URL\",203.113.138.18,4445\r\n"}, 					        // URL, port TCP
 	{"AT+SMCONF=\"USERNAME\",\"CHUNG97\"\r\n"}, 							// username
 	{"AT+SMCONF=\"PASSWORD\",\"TESTPASS\"\r\n"}, 							// pass
 	{"AT+SMCONF=\"CLIENTID\",\"TEST\"\r\n"},								// client id
 	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
 	{"AT+SMCONF=\"CLEANSS\",1\r\n"},										// cleanssession flag
-#else
-#if SERVER_TEST
-	{"AT+SMCONF=\"URL\",203.113.138.18,4445\r\n"},
-#else
-	{"AT+SMCONF=\"URL\",125.212.248.229,1883\r\n"}, 						// URL, port TCP {"AT+SMCONF=\"URL\",203.113.138.18,4445\r\n"},{"AT+SMCONF=\"URL\",171.244.133.251,1883\r\n"},
-#endif
-	{"AT+SMCONF=\"USERNAME\",\"vtag\"\r\n"},// username
-	{"AT+SMCONF=\"PASSWORD\",\"abMthkHU3UOZ7T5eICcGrVvjPbya17ER\"\r\n"},// pass
-	{"AT+SMCONF=\"CLIENTID\",\"8344\"\r\n"},// client id
+#elif INNOWAY
+	{"AT+SMCONF=\"URL\",116.101.122.190,1883\r\n"}, 					        // URL, port TCP
+	{"AT+SMCONF=\"USERNAME\",\"vtag\"\r\n"},								// username
+	{"AT+SMCONF=\"PASSWORD\",\"abMthkHU3UOZ7T5eICcGrVvjPbya17ER\"\r\n"},	// pass
+	{"AT+SMCONF=\"CLIENTID\",\"8344\"\r\n"},								// client id
 	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
-	{"AT+SMCONF=\"CLEANSS\",1\r\n"},		// cleanssession flag
+	{"AT+SMCONF=\"CLEANSS\",1\r\n"},										// cleanssession flag
+#else
+	{"AT+SMCONF=\"URL\",171.244.133.251,1883\r\n"},
+	{"AT+SMCONF=\"USERNAME\",\"VTAG_admin\"\r\n"},							// username
+	{"AT+SMCONF=\"PASSWORD\",\"\"\r\n"},									// pass
+	{"AT+SMCONF=\"CLIENTID\",\"8344\"\r\n"},								// client id
+	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
+	{"AT+SMCONF=\"CLEANSS\",1\r\n"},										// cleanssession flag
 #endif
 	{"AT+CNACT=0,1\r\n"},
 	{"AT+SMCONN\r\n"},
@@ -231,35 +264,7 @@ static ATC_List_t AT_MQTT_List[] =
 	{"AT+CNACT=0,0\r\n"},
 	{"AT+CPSI?\r\n"},
 };
-#else
-static ATC_List_t AT_MQTT_List[] =
-{
-#ifdef TEST_SERVER
-	{"AT+SMCONF=\"URL\",52.57.206.96,1883\r\n"}, 					        // URL, port TCP
-	{"AT+SMCONF=\"USERNAME\",\"CHUNG97\"\r\n"}, 							// username
-	{"AT+SMCONF=\"PASSWORD\",\"TESTPASS\"\r\n"}, 							// pass
-	{"AT+SMCONF=\"CLIENTID\",\"TEST\"\r\n"},								// client id
-	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
-	{"AT+SMCONF=\"CLEANSS\",1\r\n"},										// cleanssession flag
-#else
-#if SERVER_TEST
-	{"AT+SMCONF=\"URL\",203.113.138.18,4445\r\n"},
-#else
-	{"AT+SMCONF=\"URL\",171.244.133.251,1883\r\n"}, 						// URL, port TCP {"AT+SMCONF=\"URL\",203.113.138.18,4445\r\n"},{"AT+SMCONF=\"URL\",171.244.133.251,1883\r\n"},
-#endif
-	{"AT+SMCONF=\"USERNAME\",\"VTAG_admin\"\r\n"},// username
-	{"AT+SMCONF=\"PASSWORD\",\"\"\r\n"},// pass
-	{"AT+SMCONF=\"CLIENTID\",\"8344\"\r\n"},// client id
-	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
-	{"AT+SMCONF=\"CLEANSS\",1\r\n"},		// cleanssession flag
-#endif
-	{"AT+CNACT=0,1\r\n"},
-	{"AT+SMCONN\r\n"},
-	{"AT+SMDISC\r\n"},
-	{"AT+CNACT=0,0\r\n"},
-	{"AT+CPSI?\r\n"},
-};
-#endif
+
 char Mqtt_TX_Str[MQTT_TX_Str_Buf_Lenght];
 char MQTT_ID_Topic[75];
 

@@ -184,7 +184,7 @@ static void check_motion(void* arg)
 			if(sec_count - current_dectect > 3)
 			{
 				Flag_checkmotin_end = true;
-				if((count_ISR > 90 || (count_ISR > 60 && Flag_motion_detected == true)))
+				if((count_ISR > 90 || (count_ISR > 40 && Flag_motion_detected == true)))
 				{
 					start_wait = false;
 					first_time_wait = true;
@@ -293,7 +293,7 @@ void gpio_init(void)
 	gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
 	if(esp_sleep_get_wakeup_cause() != ESP_SLEEP_WAKEUP_UNDEFINED)
 	{
-		xTaskCreate(check_motion, "gpio_task_example", 1024*8, NULL, 5, &check_motion_handle);
+		xTaskCreate(check_motion, "check_motion", 1024*8, NULL, 5, &check_motion_handle);
 	}
 	xTaskCreate(clear_ISR_task, "clear_ISR_task", 1024*2, NULL, 5, NULL);
 	gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);

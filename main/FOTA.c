@@ -13,7 +13,7 @@
 //server test
 //#define UPDATE_JSON_URL		"http://202.191.56.104:5551/uploads/fota_profile.txt"
 
-#ifdef TEST
+#if SERVER_TEST
 	#define UPDATE_JSON_URL		"http://202.191.56.104:5551/uploads/fota_profile_test.txt"
 #else
 	#define UPDATE_JSON_URL		"http://171.244.133.231:8080/Thingworx/Things/2958380837/Services/OTA"
@@ -44,6 +44,8 @@ extern TaskHandle_t check_timeout_task_handle;
 extern TaskHandle_t gps_scan_task_handle;
 extern TaskHandle_t gps_processing_task_handle;
 extern TaskHandle_t mqtt_submessage_processing_handle;
+TaskHandle_t check_update_task_handle;
+TaskHandle_t mqtt_contol_ack_handle;
 TaskHandle_t time_out_handle;
 extern RTC_DATA_ATTR CFG VTAG_Configure;
 extern char *base_path;
@@ -67,6 +69,9 @@ extern void ESP32_Clock_Config(int Freq_Max, int Freq_Min, bool LighSleep_Select
 bool Flag_cancel_timeout = false;
 bool step_get = false;
 bool flag_get_token = true;
+bool Flag_send_DOS = false;
+bool Flag_send_DOSS = false;
+bool Flag_mqtt_conn = false;
 /*------------------------------------log_error_if_nonzero-------------------------------------------------*/
 static void log_error_if_nonzero(const char *message, int error_code)
 {
@@ -74,197 +79,11 @@ static void log_error_if_nonzero(const char *message, int error_code)
         ESP_LOGE(TAG, "Last error %s: 0x%x", message, error_code);
     }
 }
-/*------------------------------------MQTT hanlder-------------------------------------------------*/
-static void mqtt_event_handler_ack(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
-{
-    ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%d", base, event_id);
-    esp_mqtt_event_handle_t event = event_data;
-    esp_mqtt_client_handle_t client = event->client;
-    int msg_id;
-    switch ((esp_mqtt_event_id_t)event_id) {
 
-    case MQTT_EVENT_CONNECTED:
-    	ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED\r\n");
-		memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
-		sprintf(MQTT_ID_Topic, "messages/%s/control", DeviceID_TW_Str);
-		msg_id = esp_mqtt_client_subscribe(client, MQTT_ID_Topic, 1);
-		ESP_LOGI(TAG, "subcribe to topic: %s\r\n", MQTT_ID_Topic);
-		break;
-
-    case MQTT_EVENT_DISCONNECTED:
-        ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
-        break;
-
-    case MQTT_EVENT_SUBSCRIBED:
-    	memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
-		sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
-		MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Vesion, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
-		msg_id = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, strlen(Mqtt_TX_Str), 1, 0);
-        break;
-
-    case MQTT_EVENT_UNSUBSCRIBED:
-        ESP_LOGI(TAG, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
-        break;
-
-    case MQTT_EVENT_PUBLISHED:
-    	ESP_LOGI(TAG, "sent publish successful\r\n");
-        break;
-
-    case MQTT_EVENT_DATA:
-        ESP_LOGI(TAG, "MQTT_EVENT_DATA\r\n");
-        ESP_LOGI(TAG, "Data sub: %s\r\n", event->data);
-        break;
-
-    case MQTT_EVENT_ERROR:
-        ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
-        break;
-    default:
-        ESP_LOGI(TAG, "Other event id:%d", event->event_id);
-        break;
-    }
-}
-static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
-{
-    ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%d", base, event_id);
-    esp_mqtt_event_handle_t event = event_data;
-    esp_mqtt_client_handle_t client = event->client;
-    int msg_id;
-    switch ((esp_mqtt_event_id_t)event_id) {
-
-    case MQTT_EVENT_CONNECTED:
-    	ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED\r\n");
-		GetDeviceTimestamp();
-		memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
-		sprintf(MQTT_ID_Topic, "messages/%s/control", DeviceID_TW_Str);
-		msg_id = esp_mqtt_client_subscribe(client, MQTT_ID_Topic, 1);
-		ESP_LOGI(TAG, "subcribe to topic: %s\r\n", MQTT_ID_Topic);
-		break;
-
-    case MQTT_EVENT_DISCONNECTED:
-        ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");
-        break;
-
-    case MQTT_EVENT_SUBSCRIBED:
-		memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
-		sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
-		MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOSS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Version_next, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
-		msg_id = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, strlen(Mqtt_TX_Str), 1, 0);
-        break;
-
-    case MQTT_EVENT_UNSUBSCRIBED:
-        ESP_LOGI(TAG, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
-        break;
-
-    case MQTT_EVENT_PUBLISHED:
-    	ESP_LOGI(TAG, "sent publish successful\r\n");
-		break;
-
-    case MQTT_EVENT_DATA:
-        ESP_LOGI(TAG, "MQTT_EVENT_DATA");
-        printf("TOPIC=%.*s\r\n", event->topic_len, event->topic);
-        printf("DATA=%.*s\r\n", event->data_len, event->data);
-        Flag_Fota = false;
-        gpio_set_level(LED_1, 1);
-		vTaskDelay(2000/portTICK_PERIOD_MS);
-		esp_restart();
-        break;
-
-    case MQTT_EVENT_ERROR:
-    	ESP_LOGI(TAG, "MQTT_EVENT_DATA\r\n");
-		ESP_LOGI(TAG, "Data sub: %s\r\n", event->data);
-        break;
-    default:
-        ESP_LOGI(TAG, "Other event id:%d", event->event_id);
-        break;
-    }
-}
-
-static void check_timeout(void *arg)
-{
-	uint16_t start_timeout = 120;
-	while(1)
-	{
-		start_timeout--;
-		//ESP_LOGE(TAG, "Time remaining: %d", start_timeout);
-		vTaskDelay(1000/portTICK_PERIOD_MS);
-		if(start_timeout == 0 && Flag_cancel_timeout == false)
-		{
-			esp_restart();
-		}
-	}
-}
-
-static void mqtt_app_start(void)
-{
-    esp_mqtt_client_config_t mqtt_cfg = {
-#if SERVER_TEST
-        .uri = "mqtt://203.113.138.18:4445",
-#else
-		.uri = "mqtt://171.244.133.251:1883",
-#endif
-    };
-
-    esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
-    /* The last argument may be used to pass data to the event handler, in this example mqtt_event_handler */
-    esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler, NULL);
-    esp_mqtt_client_start(client);
-}
-
-static void mqtt_app_start_ack(void)
-{
-    esp_mqtt_client_config_t mqtt_cfg = {
-#if SERVER_TEST
-        .uri = "mqtt://203.113.138.18:4445",
-#else
-		.uri = "mqtt://171.244.133.251:1883",
-#endif
-    };
-
-    esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
-    /* The last argument may be used to pass data to the event handler, in this example mqtt_event_handler */
-    esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler_ack, NULL);
-    esp_mqtt_client_start(client);
-}
-
-void smartconfig_task(void *parm)
-{
-	printf("smartconfig_example_task\r\n");
-	EventBits_t uxBits;
-	ESP_ERROR_CHECK(esp_smartconfig_set_type(SC_TYPE_ESPTOUCH));
-	smartconfig_start_config_t cfg = SMARTCONFIG_START_CONFIG_DEFAULT();
-	ESP_ERROR_CHECK(esp_smartconfig_start(&cfg));
-	while (1)
-	{
-		uxBits = xEventGroupWaitBits(s_wifi_event_group, CONNECTED_BIT | ESPTOUCH_DONE_BIT, true, false, portMAX_DELAY);
-		if (uxBits & CONNECTED_BIT)
-		{
-			ESP_LOGI(TAG_wifi, "WiFi Connected to ap");
-		}
-		if (uxBits & ESPTOUCH_DONE_BIT)
-		{
-			Flag_wifi_got_led = true;
-			ESP_LOGI(TAG_wifi, "smartconfig over");
-			esp_smartconfig_stop();
-			GetDeviceTimestamp();
-			memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
-			sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
-			MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Vesion, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
-			mqtt_app_start_ack();
-			xTaskCreate(&check_update_task, "check_update_task",1024 * 8, NULL, 5, NULL);
-			vTaskDelete(NULL);
-		}
-	}
-}
-void init_OTA_component()
-{
-	Flag_wifi_init = false;
-	esp_netif_init();
-	esp_event_loop_create_default();
-	esp_wifi_set_ps(WIFI_PS_NONE);
-//	esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
-//	assert(sta_netif);
-	esp_netif_create_default_wifi_sta();
-	Flag_wifi_init = true;
+void forcedReset(){
+  esp_task_wdt_init(1, true);
+  esp_task_wdt_add(NULL);
+  while(true);
 }
 
 static void event_handler(void *arg, esp_event_base_t event_base,int32_t event_id, void *event_data)
@@ -278,16 +97,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,int32_t event_i
 		Flag_Fota_fail = true;
 		ESP_LOGI(TAG_wifi, "WiFi disconnect\r\n");
 //		esp_wifi_connect();
-		(esp_wifi_scan_stop());
-		(esp_wifi_stop());
-		(esp_wifi_deinit());
-		ESP32_Clock_Config(20, 20, false);
 		xEventGroupClearBits(s_wifi_event_group, CONNECTED_BIT);
-		while(Flag_Fota == true)
-		{
-			vTaskDelay(500/portTICK_PERIOD_MS);
-		}
-		esp_restart();
 	}
 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
 	{
@@ -366,15 +176,174 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     }
     return ESP_OK;
 }
+/*------------------------------------MQTT hanlder-------------------------------------------------*/
+static void mqtt_event_handler_ack(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
+{
+    ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%d", base, event_id);
+    esp_mqtt_event_handle_t event = event_data;
+    esp_mqtt_client_handle_t client = event->client;
+    int msg_id;
+    switch ((esp_mqtt_event_id_t)event_id) {
+
+    case MQTT_EVENT_CONNECTED:
+    	ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED\r\n");
+		memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
+		sprintf(MQTT_ID_Topic, "messages/%s/control", DeviceID_TW_Str);
+		msg_id = esp_mqtt_client_subscribe(client, MQTT_ID_Topic, 1);
+		ESP_LOGI(TAG, "subcribe to topic: %s\r\n", MQTT_ID_Topic);
+		Flag_mqtt_conn = true;
+		break;
+
+    case MQTT_EVENT_DISCONNECTED:
+    	Flag_mqtt_conn = false;
+    	ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED, RECONNECT NOW");
+    	esp_mqtt_client_reconnect(client);
+        break;
+
+    case MQTT_EVENT_SUBSCRIBED:
+        break;
+
+    case MQTT_EVENT_UNSUBSCRIBED:
+        ESP_LOGI(TAG, "MQTT_EVENT_UNSUBSCRIBED, msg_id=%d", event->msg_id);
+        break;
+
+    case MQTT_EVENT_PUBLISHED:
+    	ESP_LOGI(TAG, "sent publish successful\r\n");
+        break;
+
+    case MQTT_EVENT_DATA:
+        ESP_LOGI(TAG, "MQTT_EVENT_DATA\r\n");
+//        ESP_LOGI(TAG, "Data sub: %s\r\n", event->data);
+        break;
+
+    case MQTT_EVENT_ERROR:
+        ESP_LOGI(TAG, "MQTT_EVENT_ERROR");
+        break;
+    default:
+        ESP_LOGI(TAG, "Other event id:%d", event->event_id);
+        break;
+    }
+}
+
+void mqtt_contol_ack(void *arg)
+{
+	int err = 0;
+	esp_mqtt_client_config_t mqtt_cfg = {
+	#if SERVER_TEST
+	        .uri = "mqtt://203.113.138.18:4445",
+	#elif INNOWAY
+			.uri = "mqtt://116.101.122.190:1883",
+			.username = "vtag",
+	        .password = "abMthkHU3UOZ7T5eICcGrVvjPbya17ER",
+	#else
+			.uri = "mqtt://171.244.133.251:1883",
+	#endif
+	};
+
+	esp_mqtt_client_handle_t client = esp_mqtt_client_init(&mqtt_cfg);
+	/* The last argument may be used to pass data to the event handler, in this example mqtt_event_handler */
+	esp_mqtt_client_register_event(client, ESP_EVENT_ANY_ID, mqtt_event_handler_ack, NULL);
+	esp_mqtt_client_start(client);
+	while(1)
+	{
+		if(Flag_mqtt_conn == true && Flag_send_DOS == true)
+		{
+			memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
+			sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
+			MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Vesion, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
+			err = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, strlen(Mqtt_TX_Str), 1, 0);
+			if(err != -1) Flag_send_DOS = false;
+			vTaskDelay(1000/portTICK_PERIOD_MS);
+		}
+		else if(Flag_mqtt_conn == true &&Flag_send_DOSS == true)
+		{
+			memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
+			sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
+			MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOSS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Version_next, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
+			err = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, strlen(Mqtt_TX_Str), 1, 0);
+			if(err != -1)
+			{
+				Flag_Fota_led = Flag_wifi_got_led = false;
+//				Flag_Fota = false;
+				gpio_set_level(LED_1, 1);
+				vTaskDelay(2000/portTICK_PERIOD_MS);
+				gpio_set_level(LED_1, 0);
+				esp_mqtt_client_destroy(client);
+				vTaskDelay(1000/portTICK_PERIOD_MS);
+				esp_restart();
+//				forcedReset();
+			}
+			vTaskDelay(1000/portTICK_PERIOD_MS);
+		}
+		vTaskDelay(1000/portTICK_PERIOD_MS);
+	}
+}
+
+static void check_timeout(void *arg)
+{
+	uint16_t start_timeout = 120;
+	while(1)
+	{
+		start_timeout--;
+		//ESP_LOGE(TAG, "Time remaining: %d", start_timeout);
+		vTaskDelay(1000/portTICK_PERIOD_MS);
+		if(start_timeout == 0 && Flag_cancel_timeout == false)
+		{
+			esp_restart();
+//			forcedReset();
+		}
+	}
+}
+
+void smartconfig_task(void *parm)
+{
+	printf("smartconfig_example_task\r\n");
+	EventBits_t uxBits;
+	ESP_ERROR_CHECK(esp_smartconfig_set_type(SC_TYPE_ESPTOUCH));
+	smartconfig_start_config_t cfg = SMARTCONFIG_START_CONFIG_DEFAULT();
+	ESP_ERROR_CHECK(esp_smartconfig_start(&cfg));
+	while (1)
+	{
+		uxBits = xEventGroupWaitBits(s_wifi_event_group, CONNECTED_BIT | ESPTOUCH_DONE_BIT, true, false, portMAX_DELAY);
+		if (uxBits & CONNECTED_BIT)
+		{
+			ESP_LOGI(TAG_wifi, "WiFi Connected to ap");
+		}
+		if (uxBits & ESPTOUCH_DONE_BIT)
+		{
+			Flag_wifi_got_led = true;
+			ESP_LOGI(TAG_wifi, "smartconfig over");
+			esp_smartconfig_stop();
+			xTaskCreatePinnedToCore(mqtt_contol_ack, "mqtt_contol_ack", 4096*2, NULL, CHECKTIMEOUT_TASK_PRIO, &mqtt_contol_ack_handle, tskNO_AFFINITY);
+			xTaskCreatePinnedToCore(check_update_task, "check_update_task",1024*8, NULL, CHECKTIMEOUT_TASK_PRIO, &check_update_task_handle , tskNO_AFFINITY);
+			vTaskDelete(NULL);
+		}
+	}
+}
+void init_OTA_component()
+{
+	Flag_wifi_init = false;
+	esp_netif_init();
+	esp_event_loop_create_default();
+	esp_wifi_set_ps(WIFI_PS_NONE);
+//	esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
+//	assert(sta_netif);
+	esp_netif_create_default_wifi_sta();
+	Flag_wifi_init = true;
+}
 
 void check_update_task(void *pvParameter)
 {
 	char URL[200] = {0};
+#if SERVER_TEST
+	sprintf(URL, "http://171.244.133.226:8080/Thingworx/Things/%s/Services/OTA", DeviceID_TW_Str);
+	printf("URL: %s", URL);
+#else
 	sprintf(URL, "http://171.244.133.231:8080/Thingworx/Things/%s/Services/OTA", DeviceID_TW_Str);
 	printf("URL: %s", URL);
+#endif
 	printf("Looking for a new firmware...\n");
 	while(1) {
-
 			// configure the esp_http_client
 			esp_http_client_config_t config = {
 					.method = HTTP_METHOD_POST,
@@ -387,6 +356,7 @@ void check_update_task(void *pvParameter)
 			esp_http_client_set_header(client, "Accept", "application/json");
 			esp_http_client_set_header(client, "Content-Type", "application/json");
 			// downloading the json file
+
 			esp_err_t err = esp_http_client_perform(client);
 			if(err == ESP_OK)
 			{
@@ -415,11 +385,10 @@ void check_update_task(void *pvParameter)
 						double new_version = version->valuedouble;
 						if(new_version >= FIRMWARE_VERSION || 1)
 						{
-							printf("current firmware version (%.1f) is lower than the available one (%.1f), upgrading...\n", FIRMWARE_VERSION, new_version);
 							if(cJSON_IsString(file) && (file->valuestring != NULL))
 							{
 								printf("downloading and installing new firmware (%s)...\n", file->valuestring);
-
+								Flag_send_DOS = true;
 								esp_http_client_config_t ota_client_config = {
 									.url = file->valuestring,
 									.cert_pem = NULL,
@@ -428,60 +397,49 @@ void check_update_task(void *pvParameter)
 								esp_err_t ret = esp_https_ota(&ota_client_config);
 								if (ret == ESP_OK)
 								{
+									esp_http_client_cleanup(client);
 									ResetAllParameters();
 									Flag_Fota_success = true;
-									//send DOSS to server via cellular
-									//Create_Tasks();
-									//send DOSS to server via wifi
-									//writetofile(base_path, "vtag_ver.txt", VTAG_Version_next);
-									mqtt_app_start();
-
-									while(Flag_Fota == true)
-									{
-										vTaskDelay(500 / portTICK_PERIOD_MS);
-									}
-//									Flag_Fota_led = false;
-//									gpio_set_level(LED_1, 1);
-//									vTaskDelay(2000/portTICK_PERIOD_MS);
-//									gpio_set_level(LED_1, 0);
-//									printf("OTA OK, restarting...\n");
-//									esp_restart();
+									Flag_send_DOSS = true;
+									vTaskDelete(NULL);
 								}
 								else
 								{
 									printf("OTA failed...\n");
+									esp_http_client_cleanup(client);
+									ResetAllParameters();
+									Flag_Fota_fail = true;
+									vTaskDelete(NULL);
 								}
 							}
-							else printf("unable to read the new file name, aborting...\n");
+							else
+							{
+								printf("unable to read the new file name, aborting...\n");
+								esp_http_client_cleanup(client);
+								ResetAllParameters();
+								Flag_Fota_fail = true;
+								vTaskDelete(NULL);
+							}
 						}
-						else printf("current firmware version (%.1f) is greater or equal to the available one (%.1f), nothing to do...\n", FIRMWARE_VERSION, new_version);
+						else
+						{
+							printf("current firmware version (%.1f) is greater or equal to the available one (%.1f), nothing to do...\n", FIRMWARE_VERSION, new_version);
+							esp_http_client_cleanup(client);
+							ResetAllParameters();
+							Flag_Fota_fail = true;
+							vTaskDelete(NULL);
+						}
 					}
 				}
 			}
-			else printf("unable to download the json file, aborting...\n");
-
-			ResetAllParameters();
-			Flag_Fota_fail = true;
-//			send DOFA to server via cellular
-//			xTaskCreatePinnedToCore(mqtt_submessage_processing_task, "mqtt submessage processing", 4096*2, NULL, CHECKTIMEOUT_TASK_PRIO, &mqtt_submessage_processing_handle, tskNO_AFFINITY);
-//			xTaskCreatePinnedToCore(fota_ack, "fota_ack", 4096*2, NULL, CHECKTIMEOUT_TASK_PRIO, NULL, tskNO_AFFINITY);
-			//send DOFA to server via wifi
-//			GetDeviceTimestamp();
-//			memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
-//			sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
-//			MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOFA", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, VTAG_DeviceParameter.Device_Timestamp, VTAG_Vesion, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
-//
-//			mqtt_app_start();
-			while(Flag_Fota == true)
+			else
 			{
-				vTaskDelay(500 / portTICK_PERIOD_MS);
+				printf("unable to download the json file, aborting...\n");
+				esp_http_client_cleanup(client);
+				ResetAllParameters();
+				Flag_Fota_fail = true;
+				vTaskDelete(NULL);
 			}
-			// cleanup
-//			esp_http_client_cleanup(client);
-
-	        //vTaskDelay(30000 / portTICK_PERIOD_MS);
-			esp_restart();
-			vTaskDelete(NULL);
 	    }
 }
 
@@ -492,7 +450,6 @@ void ini_wifi()
 	//ESP_ERROR_CHECK(esp_netif_init());
 	s_wifi_event_group = xEventGroupCreate();
 	xTaskCreatePinnedToCore(fota_ack, "fota_ack", 4096*2, NULL, CHECKTIMEOUT_TASK_PRIO, NULL, tskNO_AFFINITY);
-
 	xTaskCreatePinnedToCore(check_timeout_task, "check_timeout", 4096*2, NULL, CHECKTIMEOUT_TASK_PRIO, &check_timeout_task_handle, tskNO_AFFINITY);
 	xTaskCreatePinnedToCore(mqtt_submessage_processing_task, "mqtt submessage processing", 4096*2, NULL, CHECKTIMEOUT_TASK_PRIO, &mqtt_submessage_processing_handle, tskNO_AFFINITY);
 	//ESP_ERROR_CHECK(esp_event_loop_create_default());

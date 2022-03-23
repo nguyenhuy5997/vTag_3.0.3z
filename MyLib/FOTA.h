@@ -46,5 +46,5 @@ void init_OTA_component();
 void check_update_task(void *pvParameter);
 void ini_wifi();
 void smartconfig_task(void *parm);
-
+void forcedReset();
 #endif /* MYLIB_FOTA_H_ */

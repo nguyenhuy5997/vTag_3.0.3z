@@ -1,4 +1,4 @@
-# Install script for directory: D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/main
+# Install script for directory: D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

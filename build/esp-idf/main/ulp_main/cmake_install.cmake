@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/esp-idf/main/ulp_main/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

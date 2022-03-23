@@ -17,5 +17,7 @@
 
 void TurnOn7070G(void);
 void TurnOff7070G(void);
-
+bool Is_7070_Sleep();
+void Reboot7070G(void);
+void Hard_reset7070G(void);
 #endif /* MYLIB_SIM7070G_GENERAL_CONTROL_H_ */

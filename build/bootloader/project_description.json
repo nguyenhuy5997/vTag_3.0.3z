@@ -1,8 +1,8 @@
 {
     "project_name":       "bootloader",
     "project_path":       "D:/esp-idf/components/bootloader/subproject",
-    "build_dir":          "D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/build/bootloader",
-    "config_file":        "D:/Eclipse/VTAG_ESP32_7070G_V3_GET_synctime/sdkconfig",
+    "build_dir":          "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader",
+    "config_file":        "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/sdkconfig",
     "config_defaults":    "",
     "app_elf":            "bootloader.elf",
     "app_bin":            "bootloader.bin",

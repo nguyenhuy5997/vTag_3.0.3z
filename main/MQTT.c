@@ -32,6 +32,8 @@ extern VTAG_MessageType VTAG_MessType_G;
 extern void BackUp_UnsentMessage(VTAG_MessageType Mess_Type);
 extern bool Flag_sending_backup;
 extern RTC_DATA_ATTR char DeviceID_TW_Str[50];
+extern RTC_DATA_ATTR uint8_t Reboot_reason;
+extern RTC_DATA_ATTR BU_reason Backup_reason;
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void MQTT_Connect_Callback(SIMCOM_ResponseEvent_t event, void *ResponseBuffer)
 {
@@ -134,6 +136,7 @@ void MQTT_Publish_Callback(SIMCOM_ResponseEvent_t event, void *ResponseBuffer)
 		ESP_LOGW(TAG, "MQTT Publish timeout \r\n");
 		Flag_Cycle_Completed = true;
 		Flag_backup_data = true;
+		Backup_reason = MQTT_PUB;
 		BackUp_UnsentMessage(VTAG_MessType_G);
 		//TurnOff7070G();
 	}
@@ -234,6 +237,7 @@ void MQTT_SubReceive_Wait(uint16_t Timeout)
 			if(MQTT_Sub_Timeout_Counter >= Timeout)
 			{
 				Flag_backup_data = true;
+				Backup_reason = MQTT_SUB_REC;
 				BackUp_UnsentMessage(VTAG_MessType_G);
 				//TurnOff7070G();
 			}
@@ -294,11 +298,11 @@ void MQTT_BatteryAlert_Payload_Convert(char *type)
 void MQTT_DevConf_Payload_Convert(char *str, int16_t ss, uint8_t cc, char *type, int16_t rq, uint16_t p, uint8_t m, long ts, char *version, uint8_t bat_level, char *cn, uint8_t n)
 {
 	memset(str, 0, MQTT_TX_Str_Buf_Lenght);
-	sprintf(str,"{\"ss\":%d,\"CC\":%d,\"Type\":\"%s\",\"r\":%d,\"MMC\":{\"P\":%d,\"M\":%d},\"T\":%ld,\"V\":\"%s\",\"B\":%d,\"Cn\":\"%s\",\"N\":%d}", ss, cc, type, rq, p, m, ts, version, bat_level, cn, n);
+	sprintf(str,"{\"ss\":%d,\"CC\":%d,\"Type\":\"%s\",\"r\":%d,\"MMC\":{\"P\":%d,\"M\":%d},\"T\":%ld,\"V\":\"%s\",\"B\":%d,\"Cn\":\"%s\",\"N\":%d,\"RR\":%d%d}", ss, cc, type, rq, p, m, ts, version, bat_level, cn, n, Reboot_reason, Backup_reason);
 }
 
 void MQTT_DevConf_Payload_Convert_Startup(char *str, int16_t ss, uint8_t cc, char *type, int16_t rq, uint16_t p, uint8_t m, long ts, char *version, uint8_t bat_level, char *IMSI, uint8_t n)
 {
 	memset(str, 0, MQTT_TX_Str_Buf_Lenght);
-	sprintf(str,"{\"ss\":%d,\"CC\":%d,\"Type\":\"%s\",\"r\":%d,\"MMC\":{\"P\":%d,\"M\":%d},\"T\":%ld,\"V\":\"%s\",\"B\":%d,\"Cn\":\"%s\",\"N\":%d}", ss, cc, type, rq, p, m, ts, version, bat_level, IMSI, n);
+	sprintf(str,"{\"ss\":%d,\"CC\":%d,\"Type\":\"%s\",\"r\":%d,\"MMC\":{\"P\":%d,\"M\":%d},\"T\":%ld,\"V\":\"%s\",\"B\":%d,\"Cn\":\"%s\",\"N\":%d,\"RR\":%d%d}", ss, cc, type, rq, p, m, ts, version, bat_level, IMSI, n, Reboot_reason, Backup_reason);
 }

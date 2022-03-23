@@ -8,6 +8,7 @@ idf_component_register(SRCS "real_time_stats_example_main.c"
 							"sensor.c"
 							"SPIFFS_user.c"
 							"led_indicator.c"
+							"string_user.c"
                     INCLUDE_DIRS "."
                      # Embed the server root certificate into the final binary
                     EMBED_TXTFILES ${project_dir}/server_certs/ca_cert.pem)
