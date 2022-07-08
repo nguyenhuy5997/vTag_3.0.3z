@@ -108,7 +108,7 @@ void MQTT_Disconnected_Callback(SIMCOM_ResponseEvent_t event, void *ResponseBuff
 	{
 		stepConn = 0;
 		ESP_LOGW(TAG, "MQTT disconnect timeout or error\r\n");
-		TurnOff7070G();
+		ESP_sleep(1);
 	}
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -293,6 +293,12 @@ void MQTT_BatteryAlert_Payload_Convert(char *type)
 	}
 
 	MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, type, VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, VTAG_DeviceParameter.Device_Timestamp, VTAG_Vesion, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
+}
+
+void MQTT_DevConf_FOTA_Convert(char *str, int16_t ss, uint8_t cc, char *type, int16_t rq, uint16_t p, uint8_t m, long ts, char *version, char *cn, uint8_t n)
+{
+	memset(str, 0, MQTT_TX_Str_Buf_Lenght);
+	sprintf(str,"{\"ss\":%d,\"CC\":%d,\"Type\":\"%s\",\"r\":%d,\"MMC\":{\"P\":%d,\"M\":%d},\"T\":%ld,\"V\":\"%s\",\"Cn\":\"%s\",\"N\":%d,\"RR\":%d%d}", ss, cc, type, rq, p, m, ts, version, cn, n, Reboot_reason, Backup_reason);
 }
 
 void MQTT_DevConf_Payload_Convert(char *str, int16_t ss, uint8_t cc, char *type, int16_t rq, uint16_t p, uint8_t m, long ts, char *version, uint8_t bat_level, char *cn, uint8_t n)

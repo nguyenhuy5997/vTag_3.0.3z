@@ -1,4 +1,4 @@
-/* * Data converted from D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/mbedtls/x509_crt_bundle
+/* * Data converted from C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/mbedtls/x509_crt_bundle
  */
 .data
 .section .rodata.embedded

@@ -70,9 +70,9 @@ extern RTC_DATA_ATTR char VTAG_Version_next[10];
 
 #define CALIB_FACTOR	1.048
 #define BU_Arr_Max_Num 		 	15
-
-#define INNOWAY 	1
-#define SERVER_TEST 0
+#define INNOWAY_LIVE	1
+#define INNOWAY_TEST 	0
+#define SERVER_TEST 	0
 typedef enum
 {
 	NORMAL = 0,
@@ -205,7 +205,7 @@ typedef void (*SIMCOM_SendATCallBack_t)(SIMCOM_ResponseEvent_t event, void *Resp
 // Device ID
 //#define Device_ID_TW 			"c6118176-b3a9-4c70-8a46-2685edb35d57"									// TW_1
 //#define Device_ID_TW			"ee5db00a-b105-49cf-aeab-c4d0a34bc7e9"									// TW_5
-#define Device_ID_TW			"MAN02ND00086"									// TW_KIT
+#define Device_ID_TW			"MAN02ND00073"									// TW_KIT
 
 #define MQTT_TX_Str_Buf_Lenght	500
 
@@ -243,13 +243,20 @@ static ATC_List_t AT_MQTT_List[] =
 	{"AT+SMCONF=\"CLIENTID\",\"TEST\"\r\n"},								// client id
 	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
 	{"AT+SMCONF=\"CLEANSS\",1\r\n"},										// cleanssession flag
-#elif INNOWAY
+#elif INNOWAY_TEST
 	{"AT+SMCONF=\"URL\",116.101.122.190,1883\r\n"}, 					        // URL, port TCP
 	{"AT+SMCONF=\"USERNAME\",\"vtag\"\r\n"},								// username
 	{"AT+SMCONF=\"PASSWORD\",\"abMthkHU3UOZ7T5eICcGrVvjPbya17ER\"\r\n"},	// pass
 	{"AT+SMCONF=\"CLIENTID\",\"8344\"\r\n"},								// client id
 	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
 	{"AT+SMCONF=\"CLEANSS\",1\r\n"},										// cleanssession flag
+#elif INNOWAY_LIVE
+	{"AT+SMCONF=\"URL\",vttmqtt.innoway.vn,1883\r\n"}, 					        // URL, port TCP
+	{"AT+SMCONF=\"USERNAME\",\"vtag\"\r\n"},								// username
+	{"AT+SMCONF=\"PASSWORD\",\"\"\r\n"},	// pass
+	{"AT+SMCONF=\"CLIENTID\",\"8344\"\r\n"},								// client id
+	{"AT+SMCONF=\"KEEPTIME\",120\r\n"},										// kepptime alive
+	{"AT+SMCONF=\"CLEANSS\",1\r\n"},
 #else
 	{"AT+SMCONF=\"URL\",171.244.133.251,1883\r\n"},
 	{"AT+SMCONF=\"USERNAME\",\"VTAG_admin\"\r\n"},							// username

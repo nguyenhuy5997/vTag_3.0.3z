@@ -37,7 +37,7 @@ extern bool flag_end_motion;
 extern void RTC_IRAM_ATTR wake_stub(void);
 extern RTC_DATA_ATTR uint64_t t_stop;
 extern bool Flag_checkmotin_end;
-
+extern bool Flag_motion_acc_wake_check;
 extern RTC_DATA_ATTR uint8_t Backup_Array_Counter;
 extern RTC_DATA_ATTR char Location_Backup_Array[BU_Arr_Max_Num][500];
 extern RTC_DATA_ATTR uint8_t Retry_count;
@@ -184,8 +184,9 @@ static void check_motion(void* arg)
 			if(sec_count - current_dectect > 3)
 			{
 				Flag_checkmotin_end = true;
-				if((count_ISR > 90 || (count_ISR > 40 && Flag_motion_detected == true)))
+				if((count_ISR > 75 || (count_ISR > 20 && Flag_motion_detected == true)))
 				{
+					if(Flag_motion_acc_wake_check == false) Flag_motion_acc_wake_check = true;
 					start_wait = false;
 					first_time_wait = true;
 					end = false;
@@ -307,63 +308,63 @@ void acc_config(void)
 #ifdef MC3416
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, MODE, 0x10); // 0x00
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, MODE, &read);
-	ESP_LOGW(TAG_SENSOR,"MODE: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"MODE: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, INTR_CTRL, 0x0f); // 0x1f
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, INTR_CTRL, &read);
-	ESP_LOGW(TAG_SENSOR,"INTR_CTRL: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"INTR_CTRL: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, MOTION_CTRL, 0x3f); //0x3f
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, MOTION_CTRL, &read);
-	ESP_LOGW(TAG_SENSOR, "MOTION_CTRL: %02x", read);
+	ESP_LOGI(TAG_SENSOR, "MOTION_CTRL: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, RANGE, 0x09); //0x09
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, RANGE, &read);
-	ESP_LOGW(TAG_SENSOR,"RANGE: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"RANGE: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, SR, 0x04); // 0x09
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, SR, &read);
-	ESP_LOGW(TAG_SENSOR,"SR: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"SR: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, XGAIN, 0x0f);
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, XGAIN, &read);
-	ESP_LOGW(TAG_SENSOR,"XGAIN: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"XGAIN: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, YGAIN, 0x0f);
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, YGAIN, &read);
-	ESP_LOGW(TAG_SENSOR,"YGAIN: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"YGAIN: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, ZGAIN, 0x0f);
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, ZGAIN, &read);
-	ESP_LOGW(TAG_SENSOR,"ZGAIN: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"ZGAIN: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, TF_THRESH_LSB, 0x02);
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, TF_THRESH_LSB, &read);
-	ESP_LOGW(TAG_SENSOR,"TF_THRESH_LSB: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"TF_THRESH_LSB: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, TF_THRESH_MSB, 0x00);
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, TF_THRESH_MSB, &read);
-	ESP_LOGW(TAG_SENSOR,"TF_THRESH_MSB: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"TF_THRESH_MSB: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, AM_THRESH_LSB, 0x02);
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, AM_THRESH_LSB, &read);
-	ESP_LOGW(TAG_SENSOR,"AM_THRESH_LSB: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"AM_THRESH_LSB: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, AM_THRESH_MSB, 0x00);
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, AM_THRESH_MSB, &read);
-	ESP_LOGW(TAG_SENSOR,"AM_THRESH_MSB: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"AM_THRESH_MSB: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, SHK_THRESH_LSB, 0x02);
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, SHK_THRESH_LSB, &read);
-	ESP_LOGW(TAG_SENSOR,"SHK_THRESH_LSB: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"SHK_THRESH_LSB: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, SHK_THRESH_MSB, 0x00);
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, SHK_THRESH_MSB, &read);
-	ESP_LOGW(TAG_SENSOR,"SHK_THRESH_MSB: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"SHK_THRESH_MSB: %02x", read);
 
 	i2c_WriteByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, MODE, 0x11);
 	i2c_ReadByte(I2C_MASTER_NUM, MC3413_I2C_ADDR, MODE, &read);
-	ESP_LOGW(TAG_SENSOR,"MODE: %02x", read);
+	ESP_LOGI(TAG_SENSOR,"MODE: %02x", read);
 	clear_interrupt_source();
 #endif
 #ifdef MC3413

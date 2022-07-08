@@ -57,6 +57,11 @@ extern RTC_DATA_ATTR Device_Param VTAG_DeviceParameter;
 extern RTC_DATA_ATTR uint64_t t_stop_calib;
 extern RTC_DATA_ATTR uint64_t t_slept_calib;
 extern RTC_DATA_ATTR bool Flag_reboot_7070;
+
+#define RESET_NET  1
+#define HARD_RESET 0
+#define SOFT_RESET 0
+
 bool Is_7070_Sleep()
 {
 	gpio_set_level(UART_SW, 0);
@@ -97,6 +102,7 @@ void Hard_reset7070G(void)
 }
 void Reboot7070G(void)
 {
+#if RESET_NET
 	Flag_Wait_Exit = false;
 	ATC_SendATCommand("AT+CFUN=0\r\n", "OK", 3000, 3, ATResponse_Callback);
 	WaitandExitLoop(&Flag_Wait_Exit);
@@ -104,6 +110,43 @@ void Reboot7070G(void)
 	Flag_Wait_Exit = false;
 	ATC_SendATCommand("AT+CFUN=1\r\n", "OK", 10000, 0, ATResponse_Callback);
 	WaitandExitLoop(&Flag_Wait_Exit);
+#elif HARD_RESET
+	REBOOT:
+			gpio_hold_dis(VCC_7070_EN);
+			gpio_set_level(VCC_7070_EN, 0);
+			vTaskDelay(300/RTOS_TICK_PERIOD_MS);
+			gpio_set_level(VCC_7070_EN, 1);
+			gpio_hold_en(VCC_7070_EN);
+			vTaskDelay(500 / RTOS_TICK_PERIOD_MS);
+
+			ESP_LOGW(TAG, "Turn on 7070\r\n");
+			gpio_set_level(UART_SW, 0);
+			TurnOn7070G();
+			vTaskDelay(4000 / RTOS_TICK_PERIOD_MS);
+			Flag_Wait_Exit = false;
+			ATC_SendATCommand("AT\r\n", "OK", 1000, 4, ATResponse_Callback);
+			WaitandExitLoop(&Flag_Wait_Exit);
+			if(AT_RX_event == EVEN_TIMEOUT || AT_RX_event == EVEN_ERROR)
+			{
+				goto REBOOT;
+			}
+#elif SOFT_RESET
+			ESP_LOGW(TAG, "Turn off 7070\r\n");
+			TurnOn7070G();
+			vTaskDelay(2000/RTOS_TICK_PERIOD_MS);
+	REBOOT:
+			ESP_LOGW(TAG, "Turn on 7070\r\n");
+			gpio_set_level(UART_SW, 0);
+			TurnOn7070G();
+			vTaskDelay(4000 / RTOS_TICK_PERIOD_MS);
+			Flag_Wait_Exit = false;
+			ATC_SendATCommand("AT\r\n", "OK", 1000, 4, ATResponse_Callback);
+			WaitandExitLoop(&Flag_Wait_Exit);
+			if(AT_RX_event == EVEN_TIMEOUT || AT_RX_event == EVEN_ERROR)
+			{
+				goto REBOOT;
+			}
+#endif
 }
 void TurnOn7070G(void)
 {
@@ -118,7 +161,7 @@ void TurnOn7070G(void)
 }
 #define MUL_FACT 1
 
-void TurnOff7070G(void)
+void ESP_sleep(bool Turn_off_7070)
 {
 	GetDeviceTimestamp();
 	Gettimeofday_capture =  VTAG_DeviceParameter.Device_Timestamp;
@@ -131,7 +174,7 @@ void TurnOff7070G(void)
 	}
 
 	Flag_mainthread_run = true;
-	if(Flag_button_do_nothing == false)
+	if(Turn_off_7070 == true)
 	{
 		ESP_LOGW(TAG, "Turn off 7070G\r\n");
 		TurnOn7070G();
@@ -212,14 +255,6 @@ void TurnOff7070G(void)
 		acc_power_up();
 		esp_sleep_enable_ext0_wakeup(ACC_INT, 0);
 	}
-	//if DON can not send, wake and retry until DON is sent
-//	for(int i = 0; i < Backup_Array_Counter; i++)
-//	{
-//		if(strstr(Location_Backup_Array[i], "DON"))
-//		{
-//			esp_restart();
-//		}
-//	}
 	//if backup array has DASP, wake up after 2minute to send backup array
 	for(int i = 0; i < Backup_Array_Counter; i++)
 	{
@@ -256,5 +291,6 @@ void TurnOff7070G(void)
 	esp_set_deep_sleep_wake_stub(&wake_stub);
 	esp_deep_sleep_start();
 }
+
 
 

@@ -16,7 +16,7 @@
 #define ESP32_PowerLatch    	26
 
 void TurnOn7070G(void);
-void TurnOff7070G(void);
+void ESP_sleep(bool Turn_off_7070);
 bool Is_7070_Sleep();
 void Reboot7070G(void);
 void Hard_reset7070G(void);

@@ -1,5 +1,5 @@
-D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main/CMakeFiles/ulp_main_ld_script.dir
-D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main/CMakeFiles/ulp_main.dir
-D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main/CMakeFiles/build.dir
-D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main/CMakeFiles/edit_cache.dir
-D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main/CMakeFiles/rebuild_cache.dir
+C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main/CMakeFiles/ulp_main_ld_script.dir
+C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main/CMakeFiles/ulp_main.dir
+C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main/CMakeFiles/build.dir
+C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main/CMakeFiles/edit_cache.dir
+C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main/CMakeFiles/rebuild_cache.dir

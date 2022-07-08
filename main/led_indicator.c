@@ -5,6 +5,7 @@ extern bool Flag_Unpair_led;
 extern bool Flag_test_unpair;
 extern bool Flag_wifi_got_led;
 extern bool Flag_check_run;
+extern bool Flag_new_firmware_led;
 extern bool Flag_button_cycle_start;
 extern SemaphoreHandle_t xMutex_LED;
 extern RTC_DATA_ATTR char Device_PairStatus[5];
@@ -261,7 +262,6 @@ void LED_StartMove()
 			vTaskDelay(300/portTICK_PERIOD_MS);
 		}
 	}
-
 }
 
 void LED_StopMove()
@@ -280,15 +280,30 @@ void LED_Pair()
 	while(strchr(Device_PairStatus,'U') || strlen(Device_PairStatus) == 0)
 	{
 		while(Flag_button_cycle_start == true);
-		xSemaphoreTake(xMutex_LED, portMAX_DELAY);
+		if(Flag_new_firmware_led == true)
+		{
+			for(int i = 0; i < 10; i++)
+			{
+				gpio_set_level(LED_1, 1);
+				gpio_set_level(LED_2, 1);
+				vTaskDelay(150/portTICK_PERIOD_MS);
+				gpio_set_level(LED_1, 0);
+				gpio_set_level(LED_2, 0);
+				vTaskDelay(150/portTICK_PERIOD_MS);
+			}
+			Flag_new_firmware_led = false;
+		}
 		for(int i = 0; i < 3; i++)
 		{
-		gpio_set_level(LED_1, 1);
-		vTaskDelay(200/portTICK_PERIOD_MS);
-		gpio_set_level(LED_1, 0);
-		vTaskDelay(200/portTICK_PERIOD_MS);
+			if(Flag_new_firmware_led == true)
+			{
+				break;
+			}
+			gpio_set_level(LED_1, 1);
+			vTaskDelay(200/portTICK_PERIOD_MS);
+			gpio_set_level(LED_1, 0);
+			vTaskDelay(200/portTICK_PERIOD_MS);
 		}
-		xSemaphoreGive(xMutex_LED);
 		if(Flag_Fota_led == true || Flag_test_unpair == true) break;
 		vTaskDelay(1000/portTICK_PERIOD_MS);
 	}

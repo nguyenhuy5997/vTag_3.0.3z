@@ -20,7 +20,7 @@ extern RTC_DATA_ATTR bool DBL_10;
 extern RTC_DATA_ATTR bool DBL_5;
 extern bool Flag_DBL_Task;
 extern RTC_DATA_ATTR float Calib_Pin_factor;
-
+extern RTC_DATA_ATTR bool Flag_charged;
 float Bat_CalibFactor_a_b [10][2] =
 {
 		{0.909090909, 20.90909091},
@@ -92,7 +92,7 @@ void Bat_Process_(void)
    }
    else
    {
-		if(gpio_get_level(CHARGE) == 1)
+		if(gpio_get_level(CHARGE) == 1 && Flag_charged == false)
 		{
 			 VTAG_DeviceParameter.Bat_Level = Bat_raw_pre;
 		}
@@ -100,7 +100,7 @@ void Bat_Process_(void)
 		{
 			Bat_raw_pre =  VTAG_DeviceParameter.Bat_Level;
 		}
-	}
+   }
    Bat_raw_pre = VTAG_DeviceParameter.Bat_Level;
 
    VTAG_DeviceParameter.Bat_Level =(uint16_t) ceil(Calib_Pin_factor * VTAG_DeviceParameter.Bat_Level);
@@ -130,7 +130,7 @@ void Bat_Process_(void)
 	{
 		DBL_15 = DBL_10 = DBL_5 = false;
 	}
-
+	Flag_charged = false;
 }
 
 void Bat_Process(void)

@@ -1,4 +1,4 @@
-# Install script for directory: D:/esp-idf
+# Install script for directory: C:/Users/nguyenphuonglinh/Desktop/esp-idf
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,30 +34,30 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/Users/HAOHV6/.espressif/tools/xtensa-esp32-elf/esp-2021r1-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-objdump.exe")
+  set(CMAKE_OBJDUMP "C:/Users/nguyenphuonglinh/.espressif/tools/xtensa-esp32-elf/esp-2021r1-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/newlib/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/hal/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/soc/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/micro-ecc/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/spi_flash/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/bootloader_support/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/efuse/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/esp_system/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/esp_hw_support/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/xtensa/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/esp32/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/esp_common/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/esp_rom/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/log/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/esptool_py/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/partition_table/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/bootloader/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/freertos/cmake_install.cmake")
-  include("D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/bootloader/esp-idf/main/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/newlib/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/hal/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/soc/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/micro-ecc/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/spi_flash/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/bootloader_support/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/efuse/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/esp_system/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/esp_hw_support/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/xtensa/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/esp32/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/esp_common/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/esp_rom/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/log/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/esptool_py/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/partition_table/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/bootloader/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/freertos/cmake_install.cmake")
+  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/main/cmake_install.cmake")
 
 endif()
 

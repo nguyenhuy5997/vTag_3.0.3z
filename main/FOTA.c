@@ -13,11 +13,8 @@
 //server test
 //#define UPDATE_JSON_URL		"http://202.191.56.104:5551/uploads/fota_profile.txt"
 
-#if SERVER_TEST
-	#define UPDATE_JSON_URL		"http://202.191.56.104:5551/uploads/fota_profile_test.txt"
-#else
-	#define UPDATE_JSON_URL		"http://171.244.133.231:8080/Thingworx/Things/2958380837/Services/OTA"
-#endif
+#define DIR_LINK_TEST "http://fotasimcom7070.s3.amazonaws.com/fota_profile_test.txt"
+#define DIR_LINK_LIVE "http://fotasimcom7070.s3.amazonaws.com/fota_profile.txt"
 
 char rcv_buffer[200];
 static EventGroupHandle_t s_wifi_event_group;
@@ -156,7 +153,6 @@ static void event_handler(void *arg, esp_event_base_t event_base,int32_t event_i
 }
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
-
 	switch(evt->event_id) {
         case HTTP_EVENT_ERROR:
             break;
@@ -167,7 +163,7 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
         case HTTP_EVENT_ON_HEADER:
             break;
         case HTTP_EVENT_ON_DATA:
-            strncpy(rcv_buffer, (char*)evt->data, evt->data_len);
+			strncpy(rcv_buffer+strlen(rcv_buffer), (char*)evt->data, evt->data_len);
             break;
         case HTTP_EVENT_ON_FINISH:
             break;
@@ -231,10 +227,12 @@ void mqtt_contol_ack(void *arg)
 	esp_mqtt_client_config_t mqtt_cfg = {
 	#if SERVER_TEST
 	        .uri = "mqtt://203.113.138.18:4445",
-	#elif INNOWAY
+	#elif INNOWAY_TEST
 			.uri = "mqtt://116.101.122.190:1883",
 			.username = "vtag",
 	        .password = "abMthkHU3UOZ7T5eICcGrVvjPbya17ER",
+	#elif INNOWAY_LIVE
+			.uri = "mqtt://vttmqtt.innoway.vn:1883",
 	#else
 			.uri = "mqtt://171.244.133.251:1883",
 	#endif
@@ -248,9 +246,10 @@ void mqtt_contol_ack(void *arg)
 	{
 		if(Flag_mqtt_conn == true && Flag_send_DOS == true)
 		{
+
 			memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
 			sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
-			MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Vesion, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
+			MQTT_DevConf_FOTA_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Vesion, Network_Type_Str, VTAG_Configure.Network);
 			err = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, strlen(Mqtt_TX_Str), 1, 0);
 			if(err != -1) Flag_send_DOS = false;
 			vTaskDelay(1000/portTICK_PERIOD_MS);
@@ -259,7 +258,7 @@ void mqtt_contol_ack(void *arg)
 		{
 			memset(MQTT_ID_Topic, 0, sizeof(MQTT_ID_Topic));
 			sprintf(MQTT_ID_Topic, "messages/%s/devconf", DeviceID_TW_Str);
-			MQTT_DevConf_Payload_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOSS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Version_next, VTAG_DeviceParameter.Bat_Level, Network_Type_Str, VTAG_Configure.Network);
+			MQTT_DevConf_FOTA_Convert(Mqtt_TX_Str, VTAG_NetworkSignal.RSRP, VTAG_Configure.CC, "DOSS", VTAG_NetworkSignal.RSRQ, VTAG_Configure.Period, VTAG_Configure.Mode, 0, VTAG_Version_next, Network_Type_Str, VTAG_Configure.Network);
 			err = esp_mqtt_client_publish(client, MQTT_ID_Topic, Mqtt_TX_Str, strlen(Mqtt_TX_Str), 1, 0);
 			if(err != -1)
 			{
@@ -337,18 +336,22 @@ void check_update_task(void *pvParameter)
 	char URL[200] = {0};
 #if SERVER_TEST
 	sprintf(URL, "http://171.244.133.226:8080/Thingworx/Things/%s/Services/OTA", DeviceID_TW_Str);
-	printf("URL: %s", URL);
-#else
+#elif INNOWAY_TEST
+	sprintf(URL, "http://203.113.138.18:4445/Thingworx/Things/%s/Services/OTA", DeviceID_TW_Str);
+	printf("api get fota profile: %s\r\n", URL);
+#elif INNOWAY_LIVE
 	sprintf(URL, "http://171.244.133.231:8080/Thingworx/Things/%s/Services/OTA", DeviceID_TW_Str);
-	printf("URL: %s", URL);
+	printf("api get fota profile: %s\r\n", URL);
 #endif
 	printf("Looking for a new firmware...\n");
 	while(1) {
+			memset(rcv_buffer, 0, 200);
 			// configure the esp_http_client
 			esp_http_client_config_t config = {
 					.method = HTTP_METHOD_POST,
 					.url = URL,
 					.event_handler = _http_event_handler,
+					.buffer_size = 200
 			};
 			esp_http_client_handle_t client = esp_http_client_init(&config);
 			esp_http_client_set_post_field(client, "{}", strlen("{}"));
@@ -360,11 +363,15 @@ void check_update_task(void *pvParameter)
 			esp_err_t err = esp_http_client_perform(client);
 			if(err == ESP_OK)
 			{
-
 				// parse the json file
 				ESP_LOGI(TAG_wifi, "rcv_buffer:%s", rcv_buffer);
 				cJSON *json = cJSON_Parse(rcv_buffer);
-				if(json == NULL) printf("downloaded file is not a valid json, aborting...\n");
+				if(json == NULL)
+				{
+					esp_http_client_cleanup(client);
+					printf("downloaded file is not a valid json, aborting...\n");
+					goto AWS;
+				}
 				else {
 					cJSON *version = cJSON_GetObjectItemCaseSensitive(json, "app");
 					for(int i = 0; i < strlen(version->valuestring); i++)
@@ -434,15 +441,106 @@ void check_update_task(void *pvParameter)
 			}
 			else
 			{
-				printf("unable to download the json file, aborting...\n");
-				esp_http_client_cleanup(client);
-				ResetAllParameters();
-				Flag_Fota_fail = true;
-				vTaskDelete(NULL);
+				AWS:
+				printf("unable to download the json file, change to aws cloud\n");
+				memset(rcv_buffer, 0, 200);
+				esp_http_client_config_t config = {
+						.method = HTTP_METHOD_GET,
+						.url = DIR_LINK_LIVE,
+						.event_handler = _http_event_handler,
+						.buffer_size = 200
+				};
+				esp_http_client_handle_t client_aws = esp_http_client_init(&config);
+				esp_http_client_set_method(client_aws, HTTP_METHOD_GET);
+				esp_http_client_set_header(client_aws, "Accept", "application/json");
+				esp_http_client_set_header(client_aws, "Content-Type", "application/json");
+				// downloading the json file
+				esp_err_t err = esp_http_client_perform(client_aws);
+
+				if(err == ESP_OK)
+				{
+					// parse the json file
+					ESP_LOGI(TAG_wifi, "rcv_buffer:%s", rcv_buffer);
+					cJSON *json = cJSON_Parse(rcv_buffer);
+					if(json == NULL) printf("downloaded file is not a valid json, aborting...\n");
+					else {
+						cJSON *version = cJSON_GetObjectItemCaseSensitive(json, "app");
+						for(int i = 0; i < strlen(version->valuestring); i++)
+						{
+							if(version->valuestring[i] == '.' && version->valuestring[i+1] == 'b' && version->valuestring[i+2] == 'i' && version->valuestring[i+3] == 'n')
+							{
+								version->valuestring[i] = 0;
+								break;
+							}
+						}
+						strcpy(VTAG_Version_next, version->valuestring);
+						cJSON *file = cJSON_GetObjectItemCaseSensitive(json, "host");
+
+						// check the version
+						if((!cJSON_IsNumber(version)) && 0) printf("unable to read new version, aborting...\n");
+						else
+						{
+							double new_version = version->valuedouble;
+							if(new_version >= FIRMWARE_VERSION || 1)
+							{
+								if(cJSON_IsString(file) && (file->valuestring != NULL))
+								{
+									printf("downloading and installing new firmware (%s)...\n", file->valuestring);
+									Flag_send_DOS = true;
+									esp_http_client_config_t ota_client_config = {
+										.url = file->valuestring,
+										.cert_pem = NULL,
+										.skip_cert_common_name_check = true
+									};
+									esp_err_t ret = esp_https_ota(&ota_client_config);
+									if (ret == ESP_OK)
+									{
+										esp_http_client_cleanup(client_aws);
+										ResetAllParameters();
+										Flag_Fota_success = true;
+										Flag_send_DOSS = true;
+										vTaskDelete(NULL);
+									}
+									else
+									{
+										printf("OTA failed...\n");
+										esp_http_client_cleanup(client_aws);
+										ResetAllParameters();
+										Flag_Fota_fail = true;
+										vTaskDelete(NULL);
+									}
+								}
+								else
+								{
+									printf("unable to read the new file name, aborting...\n");
+									esp_http_client_cleanup(client_aws);
+									ResetAllParameters();
+									Flag_Fota_fail = true;
+									vTaskDelete(NULL);
+								}
+							}
+							else
+							{
+								printf("current firmware version (%.1f) is greater or equal to the available one (%.1f), nothing to do...\n", FIRMWARE_VERSION, new_version);
+								esp_http_client_cleanup(client_aws);
+								ResetAllParameters();
+								Flag_Fota_fail = true;
+								vTaskDelete(NULL);
+							}
+						}
+					}
+				}
+				else
+				{
+					printf("unable to download the json file, aborting...\n");
+					esp_http_client_cleanup(client_aws);
+					ResetAllParameters();
+					Flag_Fota_fail = true;
+					vTaskDelete(NULL);
+				}
 			}
 	    }
 }
-
 
 void ini_wifi()
 {

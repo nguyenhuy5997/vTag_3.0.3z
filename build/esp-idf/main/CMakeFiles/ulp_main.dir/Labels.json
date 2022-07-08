@@ -2,34 +2,34 @@
 	"sources" : 
 	[
 		{
-			"file" : "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/CMakeFiles/ulp_main"
+			"file" : "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/CMakeFiles/ulp_main"
 		},
 		{
-			"file" : "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/CMakeFiles/ulp_main.rule"
+			"file" : "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/CMakeFiles/ulp_main.rule"
 		},
 		{
-			"file" : "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/CMakeFiles/ulp_main-complete.rule"
+			"file" : "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/CMakeFiles/ulp_main-complete.rule"
 		},
 		{
-			"file" : "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-build.rule"
+			"file" : "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-build.rule"
 		},
 		{
-			"file" : "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-configure.rule"
+			"file" : "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-configure.rule"
 		},
 		{
-			"file" : "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-download.rule"
+			"file" : "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-download.rule"
 		},
 		{
-			"file" : "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-install.rule"
+			"file" : "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-install.rule"
 		},
 		{
-			"file" : "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-mkdir.rule"
+			"file" : "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-mkdir.rule"
 		},
 		{
-			"file" : "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-patch.rule"
+			"file" : "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-patch.rule"
 		},
 		{
-			"file" : "D:/Eclipse/VTAG_ESP32_7070G_V3_S3.0.9/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-update.rule"
+			"file" : "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main-prefix/src/ulp_main-stamp/ulp_main-update.rule"
 		}
 	],
 	"target" : 
