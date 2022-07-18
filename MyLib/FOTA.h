@@ -16,7 +16,6 @@
 #include "esp_https_ota.h"
 #include "nvs.h"
 #include "nvs_flash.h"
-#include "protocol_examples_common.h"
 #include "driver/gpio.h"
 #include "esp_smartconfig.h"
 #include "cJSON.h"
@@ -36,8 +35,6 @@
 #include "nvs_flash.h"
 #include "esp_event.h"
 #include "esp_netif.h"
-#include "protocol_examples_common.h"
-
 #include "../Mylib/MQTT.h"
 #ifndef MYLIB_FOTA_H_
 #define MYLIB_FOTA_H_

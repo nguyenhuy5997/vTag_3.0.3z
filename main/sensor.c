@@ -9,6 +9,7 @@
 #include "soc/rtc.h"
 #include "../MyLib/ESP32_GPIO.h"
 #include "../MyLib/led_indicator.h"
+#include "../MyLib/Sim7070G_General_Control.h"
 
 SemaphoreHandle_t print_mux = NULL;
  xQueueHandle gpio_evt_queue = NULL;
@@ -41,7 +42,8 @@ extern bool Flag_motion_acc_wake_check;
 extern RTC_DATA_ATTR uint8_t Backup_Array_Counter;
 extern RTC_DATA_ATTR char Location_Backup_Array[BU_Arr_Max_Num][500];
 extern RTC_DATA_ATTR uint8_t Retry_count;
-
+extern RTC_DATA_ATTR uint64_t t_send_backup;
+extern RTC_DATA_ATTR uint64_t t_send_voltage;
 extern const char *TAG;
 esp_err_t i2c_master_init(void)
 {
@@ -221,24 +223,7 @@ static void check_motion(void* arg)
 					{
 						if(ACK_Succeed[0] == 0)
 						{
-							esp_sleep_enable_ext0_wakeup((ACC_INT), 0);
-							if(gpio_get_level(CHARGE) == 0)
-							{
-								esp_sleep_enable_ext1_wakeup((1ULL << CHARGE) | (1ULL << BUTTON), ESP_EXT1_WAKEUP_ANY_HIGH);
-							}
-							else
-							{
-								esp_sleep_enable_ext1_wakeup((1ULL << BUTTON), ESP_EXT1_WAKEUP_ANY_HIGH);
-							}
-							for(int i = 0; i < Backup_Array_Counter; i++)
-							{
-								if(strstr(Location_Backup_Array[i], "DASP") && Retry_count < MAX_RETRY && Flag_motion_detected == false)
-								{
-									esp_sleep_enable_timer_wakeup(120 * 1000000);
-									ESP_LOGW(TAG, "Enter to deep sleep mode in 120 sec\r\n");
-								}
-							}
-
+							ESP_sleep(0);
 							// if using this method, t_slept maybe is negative number because esp_clk_slowclk_cal_get() gives different value
 							//t_stop = (uint64_t)round(rtc_time_slowclk_to_us(rtc_time_get(), esp_clk_slowclk_cal_get())/1000000);
 							t_stop = rtc_time_get();
@@ -248,23 +233,7 @@ static void check_motion(void* arg)
 						}
 						else if(ACK_Succeed[0] == 3 && ACK_Succeed[1] == 1)
 						{
-							esp_sleep_enable_ext0_wakeup((ACC_INT), 0);
-							if(gpio_get_level(CHARGE) == 0)
-							{
-								esp_sleep_enable_ext1_wakeup((1ULL << CHARGE) | (1ULL << BUTTON), ESP_EXT1_WAKEUP_ANY_HIGH);
-							}
-							else
-							{
-								esp_sleep_enable_ext1_wakeup((1ULL << BUTTON), ESP_EXT1_WAKEUP_ANY_HIGH);
-							}
-							for(int i = 0; i < Backup_Array_Counter; i++)
-							{
-								if(strstr(Location_Backup_Array[i], "DASP") && Retry_count < MAX_RETRY && Flag_motion_detected == false)
-								{
-									esp_sleep_enable_timer_wakeup(120 * 1000000);
-									ESP_LOGW(TAG, "Enter to deep sleep mode in 120 sec\r\n");
-								}
-							}
+							ESP_sleep(0);
 							// if using this method, t_slept maybe is negative number because esp_clk_slowclk_cal_get() gives different value
 							//t_stop = (uint64_t)round(rtc_time_slowclk_to_us(rtc_time_get(), esp_clk_slowclk_cal_get())/1000000);
 							t_stop = rtc_time_get();

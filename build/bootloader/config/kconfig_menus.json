@@ -907,6 +907,16 @@
                 "type": "string"
             },
             {
+                "children": [],
+                "depends_on": "SECURE_BOOT && (IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32C3 || IDF_TARGET_ESP32S3)",
+                "help": "If this option is set, ROM bootloader will revoke the public key digest burned in efuse block\nif it fails to verify the signature of software bootloader with it.\nRevocation of keys does not happen when enabling secure boot. Once secure boot is enabled,\nkey revocation checks will be done on subsequent boot-up, while verifying the software bootloader\n\nThis feature provides a strong resistance against physical attacks on the device.\n\nNOTE: Once a digest slot is revoked, it can never be used again to verify an image\nThis can lead to permanent bricking of the device, in case all keys are revoked\nbecause of signature verification failure.",
+                "id": "SECURE_BOOT_ENABLE_AGGRESSIVE_KEY_REVOKE",
+                "name": "SECURE_BOOT_ENABLE_AGGRESSIVE_KEY_REVOKE",
+                "range": null,
+                "title": "Enable Aggressive key revoke strategy",
+                "type": "bool"
+            },
+            {
                 "children": [
                     {
                         "children": [],
@@ -1140,7 +1150,7 @@
                     {
                         "children": [],
                         "depends_on": "SECURE_TARGET_HAS_SECURE_ROM_DL_MODE && <choice SECURE_UART_ROM_DL_MODE>",
-                        "help": "If set, during startup the app will burn an eFuse bit to permanently switch the UART ROM\nDownload Mode into a separate Secure Download mode. This option can only work if\nDownload Mode is not already disabled by eFuse.\n\nSecure Download mode limits the use of Download Mode functions to simple flash read,\nwrite and erase operations, plus a command to return a summary of currently enabled\nsecurity features.\n\nSecure Download mode is not compatible with the esptool.py flasher stub feature,\nespefuse.py, read/writing memory or registers, encrypted download, or any other\nfeatures that interact with unsupported Download Mode commands.\n\nSecure Download mode should be enabled in any application where Flash Encryption\nand/or Secure Boot is enabled. Disabling this option does not immediately cancel\nthe benefits of the security features, but it increases the potential \"attack\nsurface\" for an attacker to try and bypass them with a successful physical attack.\n\nIt is also possible to enable secure download mode at runtime by calling\nesp_efuse_enable_rom_secure_download_mode()",
+                        "help": "If set, during startup the app will burn an eFuse bit to permanently switch the UART ROM\nDownload Mode into a separate Secure Download mode. This option can only work if\nDownload Mode is not already disabled by eFuse.\n\nSecure Download mode limits the use of Download Mode functions to simple flash read,\nwrite and erase operations, plus a command to return a summary of currently enabled\nsecurity features.\n\nSecure Download mode is not compatible with the esptool.py flasher stub feature,\nespefuse.py, read/writing memory or registers, encrypted download, or any other\nfeatures that interact with unsupported Download Mode commands.\n\nSecure Download mode should be enabled in any application where Flash Encryption\nand/or Secure Boot is enabled. Disabling this option does not immediately cancel\nthe benefits of the security features, but it increases the potential \"attack\nsurface\" for an attacker to try and bypass them with a successful physical attack.\n\nIt is also possible to enable secure download mode at runtime by calling\nesp_efuse_enable_rom_secure_download_mode()\n\nNote: Secure Download mode is not available for ESP32 (includes revisions till ECO3).",
                         "id": "SECURE_ENABLE_SECURE_ROM_DL_MODE",
                         "name": "SECURE_ENABLE_SECURE_ROM_DL_MODE",
                         "range": null,
@@ -1342,58 +1352,7 @@
                 "type": "bool"
             },
             {
-                "children": [
-                    {
-                        "children": [
-                            {
-                                "children": [],
-                                "depends_on": "<choice ESPTOOLPY_FLASH_VENDOR>",
-                                "help": null,
-                                "id": "ESPTOOLPY_FLASH_VENDOR_MXIC",
-                                "name": "ESPTOOLPY_FLASH_VENDOR_MXIC",
-                                "range": null,
-                                "title": "MXIC OPI FLASH(MX25UM25645G)",
-                                "type": "bool"
-                            }
-                        ],
-                        "depends_on": "ESPTOOLPY_OCT_FLASH",
-                        "help": null,
-                        "id": "serial-flasher-config-enable-octal-flash-select-opi-flash-vendor",
-                        "name": "ESPTOOLPY_FLASH_VENDOR",
-                        "title": "Select OPI Flash Vendor",
-                        "type": "choice"
-                    },
-                    {
-                        "children": [
-                            {
-                                "children": [],
-                                "depends_on": "ESPTOOLPY_FLASH_VENDOR_MXIC && <choice ESPTOOLPY_FLASHMODE_OCT>",
-                                "help": null,
-                                "id": "ESPTOOLPY_FLASHMODE_OPI_STR",
-                                "name": "ESPTOOLPY_FLASHMODE_OPI_STR",
-                                "range": null,
-                                "title": "OPI_STR",
-                                "type": "bool"
-                            },
-                            {
-                                "children": [],
-                                "depends_on": "ESPTOOLPY_FLASH_VENDOR_MXIC && <choice ESPTOOLPY_FLASHMODE_OCT>",
-                                "help": null,
-                                "id": "ESPTOOLPY_FLASHMODE_OPI_DTR",
-                                "name": "ESPTOOLPY_FLASHMODE_OPI_DTR",
-                                "range": null,
-                                "title": "OPI_DTR",
-                                "type": "bool"
-                            }
-                        ],
-                        "depends_on": "ESPTOOLPY_OCT_FLASH",
-                        "help": null,
-                        "id": "serial-flasher-config-enable-octal-flash-flash-opi-mode",
-                        "name": "ESPTOOLPY_FLASHMODE_OCT",
-                        "title": "Flash OPI mode",
-                        "type": "choice"
-                    }
-                ],
+                "children": [],
                 "depends_on": "IDF_TARGET_ESP32S3",
                 "help": null,
                 "id": "ESPTOOLPY_OCT_FLASH",
@@ -1406,7 +1365,7 @@
                 "children": [
                     {
                         "children": [],
-                        "depends_on": "<choice ESPTOOLPY_FLASHMODE>",
+                        "depends_on": "!ESPTOOLPY_OCT_FLASH && <choice ESPTOOLPY_FLASHMODE>",
                         "help": null,
                         "id": "ESPTOOLPY_FLASHMODE_QIO",
                         "name": "ESPTOOLPY_FLASHMODE_QIO",
@@ -1416,7 +1375,7 @@
                     },
                     {
                         "children": [],
-                        "depends_on": "<choice ESPTOOLPY_FLASHMODE>",
+                        "depends_on": "!ESPTOOLPY_OCT_FLASH && <choice ESPTOOLPY_FLASHMODE>",
                         "help": null,
                         "id": "ESPTOOLPY_FLASHMODE_QOUT",
                         "name": "ESPTOOLPY_FLASHMODE_QOUT",
@@ -1426,7 +1385,7 @@
                     },
                     {
                         "children": [],
-                        "depends_on": "<choice ESPTOOLPY_FLASHMODE>",
+                        "depends_on": "!ESPTOOLPY_OCT_FLASH && <choice ESPTOOLPY_FLASHMODE>",
                         "help": null,
                         "id": "ESPTOOLPY_FLASHMODE_DIO",
                         "name": "ESPTOOLPY_FLASHMODE_DIO",
@@ -1436,12 +1395,22 @@
                     },
                     {
                         "children": [],
-                        "depends_on": "<choice ESPTOOLPY_FLASHMODE>",
+                        "depends_on": "!ESPTOOLPY_OCT_FLASH && <choice ESPTOOLPY_FLASHMODE>",
                         "help": null,
                         "id": "ESPTOOLPY_FLASHMODE_DOUT",
                         "name": "ESPTOOLPY_FLASHMODE_DOUT",
                         "range": null,
                         "title": "DOUT",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": "ESPTOOLPY_OCT_FLASH && <choice ESPTOOLPY_FLASHMODE>",
+                        "help": null,
+                        "id": "ESPTOOLPY_FLASHMODE_OPI",
+                        "name": "ESPTOOLPY_FLASHMODE_OPI",
+                        "range": null,
+                        "title": "OPI",
                         "type": "bool"
                     }
                 ],
@@ -1450,6 +1419,36 @@
                 "id": "serial-flasher-config-flash-spi-mode",
                 "name": "ESPTOOLPY_FLASHMODE",
                 "title": "Flash SPI mode",
+                "type": "choice"
+            },
+            {
+                "children": [
+                    {
+                        "children": [],
+                        "depends_on": "<choice ESPTOOLPY_FLASH_SAMPLE_MODE>",
+                        "help": null,
+                        "id": "ESPTOOLPY_FLASH_SAMPLE_MODE_STR",
+                        "name": "ESPTOOLPY_FLASH_SAMPLE_MODE_STR",
+                        "range": null,
+                        "title": "STR Mode",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
+                        "depends_on": "ESPTOOLPY_OCT_FLASH && <choice ESPTOOLPY_FLASH_SAMPLE_MODE>",
+                        "help": null,
+                        "id": "ESPTOOLPY_FLASH_SAMPLE_MODE_DTR",
+                        "name": "ESPTOOLPY_FLASH_SAMPLE_MODE_DTR",
+                        "range": null,
+                        "title": "DTR Mode",
+                        "type": "bool"
+                    }
+                ],
+                "depends_on": null,
+                "help": null,
+                "id": "serial-flasher-config-flash-sampling-mode",
+                "name": "ESPTOOLPY_FLASH_SAMPLE_MODE",
+                "title": "Flash Sampling Mode",
                 "type": "choice"
             },
             {
@@ -1466,7 +1465,7 @@
                 "children": [
                     {
                         "children": [],
-                        "depends_on": "ESPTOOLPY_FLASHMODE_OPI_STR && <choice ESPTOOLPY_FLASHFREQ>",
+                        "depends_on": "IDF_TARGET_ESP32S3 && ESPTOOLPY_FLASH_SAMPLE_MODE_STR && <choice ESPTOOLPY_FLASHFREQ>",
                         "help": null,
                         "id": "ESPTOOLPY_FLASHFREQ_120M",
                         "name": "ESPTOOLPY_FLASHFREQ_120M",
@@ -2163,6 +2162,16 @@
             },
             {
                 "children": [],
+                "depends_on": "IDF_TARGET_ARCH_RISCV",
+                "help": "Adds -msave-restore to C/C++ compilation flags.\n\nWhen this flag is enabled, compiler will call library functions to\nsave/restore registers in function prologues/epilogues. This results\nin lower overall code size, at the expense of slightly reduced performance.\n\nThis option can be enabled for RISC-V targets only.",
+                "id": "COMPILER_SAVE_RESTORE_LIBCALLS",
+                "name": "COMPILER_SAVE_RESTORE_LIBCALLS",
+                "range": null,
+                "title": "Enable -msave-restore flag to reduce code size",
+                "type": "bool"
+            },
+            {
+                "children": [],
                 "depends_on": null,
                 "help": "Enable this option if using GCC 6 or newer, and wanting to disable warnings which don't appear with\nGCC 5.",
                 "id": "COMPILER_DISABLE_GCC8_WARNINGS",
@@ -2638,7 +2647,7 @@
                                     },
                                     {
                                         "children": [],
-                                        "depends_on": "SPIRAM && IDF_TARGET_ESP32 && ESP32_SPIRAM_SUPPORT",
+                                        "depends_on": "SPIRAM && (IDF_TARGET_ESP32 || IDF_TARGET_ESP32S2) && ESP32_SPIRAM_SUPPORT",
                                         "help": "If enabled, variables with EXT_RAM_ATTR attribute will be placed in SPIRAM instead of internal DRAM.\nBSS section of `lwip`, `net80211`, `pp`, `bt` libraries will be automatically placed\nin SPIRAM. BSS sections from other object files and libraries can also be placed in SPIRAM through\nlinker fragment scheme `extram_bss`.\n\nNote that the variables placed in SPIRAM using EXT_RAM_ATTR will be zero initialized.",
                                         "id": "SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY",
                                         "name": "SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY",
@@ -3386,7 +3395,7 @@
                         "name": "ESP32_RTC_CLK_CAL_CYCLES",
                         "range": [
                             0,
-                            27000
+                            32766
                         ],
                         "title": "Number of cycles for RTC_SLOW_CLK calibration",
                         "type": "int"
@@ -3529,7 +3538,7 @@
                             {
                                 "children": [],
                                 "depends_on": "ESP32_USE_FIXED_STATIC_RAM_SIZE",
-                                "help": "RAM size dedicated for static variables (.data & .bss sections).\nPlease note that the actual length will be reduced by BT_RESERVE_DRAM if Bluetooth\ncontroller is enabled.",
+                                "help": "RAM size dedicated for static variables (.data & .bss sections).\nPlease note that the actual length will be reduced by BTDM_RESERVE_DRAM if Bluetooth\ncontroller is enabled.",
                                 "id": "ESP32_FIXED_STATIC_RAM_SIZE",
                                 "name": "ESP32_FIXED_STATIC_RAM_SIZE",
                                 "range": null,
@@ -3710,6 +3719,36 @@
                                 "range": null,
                                 "title": null,
                                 "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": null,
+                                "help": "esp32c3 and esp32s3 will reset at wake-up if GPIO is received a small electrostatic\npulse during light sleep, with specific condition\n\n- GPIO needs to be configured as input-mode only\n- The pin receives a small electrostatic pulse, and reset occurs when the pulse\n  voltage is higher than 6 V\n\nFor GPIO set to input mode only, it is not a good practice to leave it open/floating,\nThe hardware design needs to controlled it with determined supply or ground voltage\nis necessary.\n\nThis option provides a software workaround for this issue. Configure to isolate all\nGPIO pins in sleep state.",
+                                "id": "ESP_SLEEP_GPIO_RESET_WORKAROUND",
+                                "name": "ESP_SLEEP_GPIO_RESET_WORKAROUND",
+                                "range": null,
+                                "title": "light sleep GPIO reset workaround",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "SPIRAM",
+                                "help": "When the CS pin of SPIRAM is not pulled up, the sleep current will\nincrease during light sleep. If the CS pin of SPIRAM has an external\npull-up, you do not need to select this option, otherwise, you\nshould enable this option.",
+                                "id": "ESP_SLEEP_PSRAM_LEAKAGE_WORKAROUND",
+                                "name": "ESP_SLEEP_PSRAM_LEAKAGE_WORKAROUND",
+                                "range": null,
+                                "title": "PSRAM leakage current workaround in light sleep",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": null,
+                                "help": "When the CS pin of Flash is not pulled up, the sleep current will\nincrease during light sleep. If the CS pin of Flash has an external\npull-up, you do not need to select this option, otherwise, you\nshould enable this option.",
+                                "id": "ESP_SLEEP_FLASH_LEAKAGE_WORKAROUND",
+                                "name": "ESP_SLEEP_FLASH_LEAKAGE_WORKAROUND",
+                                "range": null,
+                                "title": "Flash leakage current workaround in light sleep",
+                                "type": "bool"
                             }
                         ],
                         "depends_on": null,
@@ -3807,6 +3846,16 @@
                     },
                     {
                         "children": [],
+                        "depends_on": null,
+                        "help": null,
+                        "id": "ESP_SYSTEM_RTC_EXT_OSC",
+                        "name": "ESP_SYSTEM_RTC_EXT_OSC",
+                        "range": null,
+                        "title": null,
+                        "type": "bool"
+                    },
+                    {
+                        "children": [],
                         "depends_on": "ESP_SYSTEM_RTC_EXT_XTAL",
                         "help": "To reduce the startup time of an external RTC crystal,\nwe bootstrap it with a 32kHz square wave for a fixed number of cycles.\nSetting 0 will disable bootstrapping (if disabled, the crystal may take\nlonger to start up or fail to oscillate under some conditions).\n\nIf this value is too high, a faulty crystal may initially start and then fail.\nIf this value is too low, an otherwise good crystal may not start.\n\nTo accurately determine if the crystal has started,\nset a larger \"Number of cycles for RTC_SLOW_CLK calibration\" (about 3000).",
                         "id": "ESP_SYSTEM_RTC_EXT_XTAL_BOOTSTRAP_CYCLES",
@@ -3848,6 +3897,16 @@
                     {
                         "children": [
                             {
+                                "children": [],
+                                "depends_on": null,
+                                "help": null,
+                                "id": "ESP_SYSTEM_MEMPROT_DEPCHECK",
+                                "name": "ESP_SYSTEM_MEMPROT_DEPCHECK",
+                                "range": null,
+                                "title": null,
+                                "type": "bool"
+                            },
+                            {
                                 "children": [
                                     {
                                         "children": [],
@@ -3860,13 +3919,33 @@
                                         "type": "bool"
                                     }
                                 ],
-                                "depends_on": "IDF_TARGET_ESP32C3 || IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32H2",
+                                "depends_on": "ESP_SYSTEM_MEMPROT_DEPCHECK",
                                 "help": "If enabled, the permission control module watches all the memory access and fires the panic handler\nif a permission violation is detected. This feature automatically splits\nthe SRAM memory into data and instruction segments and sets Read/Execute permissions\nfor the instruction part (below given splitting address) and Read/Write permissions\nfor the data part (above the splitting address). The memory protection is effective\non all access through the IRAM0 and DRAM0 buses.",
                                 "id": "ESP_SYSTEM_MEMPROT_FEATURE",
                                 "name": "ESP_SYSTEM_MEMPROT_FEATURE",
                                 "range": null,
                                 "title": "Enable memory protection",
                                 "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "ESP_SYSTEM_MEMPROT_DEPCHECK",
+                                "help": null,
+                                "id": "ESP_SYSTEM_MEMPROT_CPU_PREFETCH_PAD_SIZE",
+                                "name": "ESP_SYSTEM_MEMPROT_CPU_PREFETCH_PAD_SIZE",
+                                "range": null,
+                                "title": null,
+                                "type": "int"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "ESP_SYSTEM_MEMPROT_DEPCHECK",
+                                "help": null,
+                                "id": "ESP_SYSTEM_MEMPROT_MEM_ALIGN_SIZE",
+                                "name": "ESP_SYSTEM_MEMPROT_MEM_ALIGN_SIZE",
+                                "range": null,
+                                "title": null,
+                                "type": "int"
                             }
                         ],
                         "depends_on": null,
@@ -4022,6 +4101,36 @@
                         "id": "component-config-esp-system-settings-channel-for-console-output",
                         "name": "ESP_CONSOLE_UART",
                         "title": "Channel for console output",
+                        "type": "choice"
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [],
+                                "depends_on": "<choice ESP_CONSOLE_SECONDARY>",
+                                "help": null,
+                                "id": "ESP_CONSOLE_SECONDARY_NONE",
+                                "name": "ESP_CONSOLE_SECONDARY_NONE",
+                                "range": null,
+                                "title": "No secondary console",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "!ESP_CONSOLE_USB_SERIAL_JTAG && <choice ESP_CONSOLE_SECONDARY>",
+                                "help": "This option supports output through USB_SERIAL_JTAG port when the UART0 port is not connected.\nThe output currently only supports non-blocking mode without using the console.\nIf you want to output in blocking mode with REPL or input through USB_SERIAL_JTAG port,\nplease change the primary config to ESP_CONSOLE_USB_SERIAL_JTAG above.",
+                                "id": "ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG",
+                                "name": "ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG",
+                                "range": null,
+                                "title": "USB_SERIAL_JTAG PORT",
+                                "type": "bool"
+                            }
+                        ],
+                        "depends_on": "IDF_TARGET_ESP32S3 || IDF_TARGET_ESP32C3",
+                        "help": "This secondary option supports output through other specific port like USB_SERIAL_JTAG\nwhen UART0 port as a primary is selected but not connected. This secondary output currently only supports\nnon-blocking mode without using REPL. If you want to output in blocking mode with REPL or\ninput through this secondary port, please change the primary config to this port\nin `Channel for console output` menu.",
+                        "id": "component-config-esp-system-settings-channel-for-console-secondary-output",
+                        "name": "ESP_CONSOLE_SECONDARY",
+                        "title": "Channel for console secondary output",
                         "type": "choice"
                     },
                     {
@@ -4226,6 +4335,37 @@
                         "type": "bool"
                     },
                     {
+                        "children": [
+                            {
+                                "children": [],
+                                "depends_on": "ESP_XT_WDT",
+                                "help": "Timeout period configuration for the XTAL32K watchdog timer based on RTC_CLK.",
+                                "id": "ESP_XT_WDT_TIMEOUT",
+                                "name": "ESP_XT_WDT_TIMEOUT",
+                                "range": null,
+                                "title": "XTAL32K watchdog timeout period",
+                                "type": "int"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "ESP_XT_WDT",
+                                "help": "Enable this to automatically switch to BACKUP32K_CLK as the source of RTC_SLOW_CLK when\nthe watchdog timer expires.",
+                                "id": "ESP_XT_WDT_BACKUP_CLK_ENABLE",
+                                "name": "ESP_XT_WDT_BACKUP_CLK_ENABLE",
+                                "range": null,
+                                "title": "Automatically switch to BACKUP32K_CLK when timer expires",
+                                "type": "bool"
+                            }
+                        ],
+                        "depends_on": "!IDF_TARGET_ESP32 && (ESP_SYSTEM_RTC_EXT_OSC || ESP_SYSTEM_RTC_EXT_XTAL)",
+                        "help": "This watchdog timer can detect oscillation failure of the XTAL32K_CLK. When such a failure\nis detected the hardware can be set up to automatically switch to BACKUP32K_CLK and generate\nan interrupt.",
+                        "id": "ESP_XT_WDT",
+                        "name": "ESP_XT_WDT",
+                        "range": null,
+                        "title": "Initialize XTAL32K watchdog timer on startup",
+                        "type": "bool"
+                    },
+                    {
                         "children": [],
                         "depends_on": null,
                         "help": "If this option is disabled (default), the panic handler code is placed in flash not IRAM.\nThis means that if ESP-IDF crashes while flash cache is disabled, the panic handler will\nautomatically re-enable flash cache before running GDB Stub or Core Dump. This adds some minor\nrisk, if the flash cache status is also corrupted during the crash.\n\nIf this option is enabled, the panic handler code (including required UART functions) is placed\nin IRAM. This may be necessary to debug some complex issues with crashes while flash cache is\ndisabled (for example, when writing to SPI flash) or when flash cache is corrupted when an exception\nis triggered.",
@@ -4244,6 +4384,36 @@
                         "range": null,
                         "title": null,
                         "type": "bool"
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [],
+                                "depends_on": "IDF_TARGET_ESP32 && <choice ESP_SYSTEM_CHECK_INT_LEVEL>",
+                                "help": "Using level 5 interrupt for Interrupt Watchdog and other system checks.",
+                                "id": "ESP_SYSTEM_CHECK_INT_LEVEL_5",
+                                "name": "ESP_SYSTEM_CHECK_INT_LEVEL_5",
+                                "range": null,
+                                "title": "Level 5 interrupt",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "!BTDM_CTRL_HLI && <choice ESP_SYSTEM_CHECK_INT_LEVEL>",
+                                "help": "Using level 4 interrupt for Interrupt Watchdog and other system checks.",
+                                "id": "ESP_SYSTEM_CHECK_INT_LEVEL_4",
+                                "name": "ESP_SYSTEM_CHECK_INT_LEVEL_4",
+                                "range": null,
+                                "title": "Level 4 interrupt",
+                                "type": "bool"
+                            }
+                        ],
+                        "depends_on": null,
+                        "help": "Interrupt level to use for Interrupt Watchdog and other system checks.",
+                        "id": "component-config-esp-system-settings-interrupt-level-to-use-for-interrupt-watchdog-and-other-system-checks",
+                        "name": "ESP_SYSTEM_CHECK_INT_LEVEL",
+                        "title": "Interrupt level to use for Interrupt Watchdog and other system checks",
+                        "type": "choice"
                     }
                 ],
                 "depends_on": null,
@@ -4782,6 +4952,27 @@
                         "name": "FREERTOS_FPU_IN_ISR",
                         "range": null,
                         "title": "Allow use of float inside Level 1 ISR (EXPERIMENTAL)",
+                        "type": "bool"
+                    },
+                    {
+                        "children": [
+                            {
+                                "children": [],
+                                "depends_on": "FREERTOS_ENABLE_TASK_SNAPSHOT && !ESP_PANIC_HANDLER_IRAM",
+                                "help": "When enabled, the functions related to snapshots, such as vTaskGetSnapshot or uxTaskGetSnapshotAll,\nwill be placed in flash. Note that if enabled, these functions cannot be called when cache is disabled.",
+                                "id": "FREERTOS_PLACE_SNAPSHOT_FUNS_INTO_FLASH",
+                                "name": "FREERTOS_PLACE_SNAPSHOT_FUNS_INTO_FLASH",
+                                "range": null,
+                                "title": "Place task snapshot functions into flash",
+                                "type": "bool"
+                            }
+                        ],
+                        "depends_on": null,
+                        "help": "When enabled, the functions related to snapshots, such as vTaskGetSnapshot or uxTaskGetSnapshotAll,\nare compiled and linked.",
+                        "id": "FREERTOS_ENABLE_TASK_SNAPSHOT",
+                        "name": "FREERTOS_ENABLE_TASK_SNAPSHOT",
+                        "range": null,
+                        "title": "Enable task snapshot functions",
                         "type": "bool"
                     }
                 ],
@@ -5431,6 +5622,16 @@
                                 "name": "SPI_FLASH_SUPPORT_BOYA_CHIP",
                                 "range": null,
                                 "title": "BOYA",
+                                "type": "bool"
+                            },
+                            {
+                                "children": [],
+                                "depends_on": "IDF_TARGET_ESP32S3",
+                                "help": "Enable this to support auto detection of Octal MXIC chips if chip vendor not directly\ngiven by ``chip_drv`` member of the chip struct. This adds support for variant\nchips, however will extend detecting time.",
+                                "id": "SPI_FLASH_SUPPORT_MXIC_OPI_CHIP",
+                                "name": "SPI_FLASH_SUPPORT_MXIC_OPI_CHIP",
+                                "range": null,
+                                "title": "mxic (opi)",
                                 "type": "bool"
                             }
                         ],

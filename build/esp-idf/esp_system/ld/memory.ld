@@ -47,6 +47,21 @@
  */
        
 /* List of deprecated options */
+/*
+
+ * SPDX-FileCopyrightText: 2021 Espressif Systems (Shanghai) CO LTD
+
+ *
+
+ * SPDX-License-Identifier: Apache-2.0
+
+ */
+/* CPU instruction prefetch padding size for flash mmap scenario */
+_esp_flash_mmap_prefetch_pad_size = 16;
+/* CPU instruction prefetch padding size for memory protection scenario */
+_esp_memprot_prefetch_pad_size = 0;
+/* Memory alignment size for PMS */
+_esp_memprot_align_size = 0;
 /* If BT is not built at all */
 MEMORY
 {
@@ -91,8 +106,8 @@ MEMORY
      additional static memory temporarily cannot be used.
 
   */
-  dram0_0_seg (RW) : org = 0x3FFB0000 + 0x0,
-                                     len = 0x2c200 - 0x0
+  dram0_0_seg (RW) : org = 0x3FFB0000 + 0,
+                                     len = 0x2c200 - 0
   /* Flash mapped constant data */
   drom0_0_seg (R) : org = 0x3F400020, len = 0x400000-0x20
   /* (See iram0_2_seg for meaning of 0x20 offset in the above.) */
@@ -111,7 +126,7 @@ MEMORY
   */
   rtc_slow_seg(RW) : org = 0x50000000 + 256,
                                      len = 0x2000 - 256
-  /* external memory ,including data and text */
+  /* external memory */
   extern_ram_seg(RWX) : org = 0x3F800000,
                                      len = 0x400000
 }

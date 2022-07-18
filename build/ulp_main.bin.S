@@ -1,4 +1,4 @@
-/* * Data converted from C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main/ulp_main.bin
+/* * Data converted from C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/esp-idf/main/ulp_main/ulp_main.bin
  */
 .data
 .section .rodata.embedded

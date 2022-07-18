@@ -57,11 +57,13 @@ extern RTC_DATA_ATTR Device_Param VTAG_DeviceParameter;
 extern RTC_DATA_ATTR uint64_t t_stop_calib;
 extern RTC_DATA_ATTR uint64_t t_slept_calib;
 extern RTC_DATA_ATTR bool Flag_reboot_7070;
+extern RTC_DATA_ATTR uint64_t t_total_passed_vol;
+extern RTC_DATA_ATTR uint64_t t_total_passed_BU;
 
 #define RESET_NET  1
 #define HARD_RESET 0
 #define SOFT_RESET 0
-
+#define MIN(a,b,c,d)  ((a < b && a < c && a < d) ? a: ((b < c && b < d) ? b : (c < d ? c : d)))
 bool Is_7070_Sleep()
 {
 	gpio_set_level(UART_SW, 0);
@@ -99,6 +101,24 @@ void Hard_reset7070G(void)
 		{
 			goto REBOOT;
 		}
+}
+void SoftReboot7070G(void)
+{
+	ESP_LOGW(TAG, "Turn off 7070\r\n");
+	TurnOn7070G();
+	vTaskDelay(2000/RTOS_TICK_PERIOD_MS);
+REBOOT:
+	ESP_LOGW(TAG, "Turn on 7070\r\n");
+	gpio_set_level(UART_SW, 0);
+	TurnOn7070G();
+	vTaskDelay(4000 / RTOS_TICK_PERIOD_MS);
+	Flag_Wait_Exit = false;
+	ATC_SendATCommand("AT\r\n", "OK", 1000, 4, ATResponse_Callback);
+	WaitandExitLoop(&Flag_Wait_Exit);
+	if(AT_RX_event == EVEN_TIMEOUT || AT_RX_event == EVEN_ERROR)
+	{
+		goto REBOOT;
+	}
 }
 void Reboot7070G(void)
 {
@@ -188,58 +208,61 @@ void ESP_sleep(bool Turn_off_7070)
 	}
 	ESP_LOGW(TAG, "Tracking runtime: %d s\r\n", TrackingRuntime);
 	//wakeup_time_sec = VTAG_Configure.Period*60 - TrackingRuntime;
-	t_actived = t_actived + time_slept + TrackingRuntime;
+	if(Flag_motion_detected)
+	{
+		t_total_passed_vol = t_total_passed_BU = 0;
+		t_actived = t_actived + time_slept + TrackingRuntime;
+		if((t_actived > VTAG_Configure.Period * 60 * MUL_FACT|| flag_start_motion == true) && Flag_button_do_nothing == false)
+		{
+			flag_start_motion = false;
+			time_slept = 0;
+			t_actived = 0;
+			//ESP_LOGW(TAG, "time_slept %d sec\r\n",(int) time_slept);
+			t_actived = t_actived + TrackingRuntime;
+		}
+		acc_counter = (uint64_t)round(rtc_time_slowclk_to_us(rtc_time_get() - acc_capture, esp_clk_slowclk_cal_get())/1000000);
+		ESP_LOGW(TAG, "acc_counter: %d s\r\n",(int)acc_counter);
+		ESP_LOGW(TAG, "t_actived: %d sec\r\n",(int) t_actived);
+		if(VTAG_Configure.Period * 60 * MUL_FACT >= t_actived)
+		{
+			tp =  VTAG_Configure.Period * 60 * MUL_FACT - t_actived;
+			t_stop =  (uint64_t)round(rtc_time_get());
+			ESP_LOGW(TAG, "t_stop: " "%" PRIu64 " s\r\n",t_stop);
+		}
+		else
+		{
+			t_stop =  (uint64_t)round(rtc_time_get());
+			tp = 0;
+		}
 
-	if((t_actived > VTAG_Configure.Period * 60 * MUL_FACT|| flag_start_motion == true) && Flag_button_do_nothing == false)
-	{
-		flag_start_motion = false;
-		time_slept = 0;
-		t_actived = 0;
-		//ESP_LOGW(TAG, "time_slept %d sec\r\n",(int) time_slept);
-		t_actived = t_actived + TrackingRuntime;
-	}
-	acc_counter = (uint64_t)round(rtc_time_slowclk_to_us(rtc_time_get() - acc_capture, esp_clk_slowclk_cal_get())/1000000);
-	ESP_LOGW(TAG, "acc_counter: %d s\r\n",(int)acc_counter);
-	ESP_LOGW(TAG, "t_actived: %d sec\r\n",(int) t_actived);
-	if(VTAG_Configure.Period * 60 * MUL_FACT >= t_actived)
-	{
-		tp =  VTAG_Configure.Period * 60 * MUL_FACT - t_actived;
-		t_stop =  (uint64_t)round(rtc_time_get());
-		ESP_LOGW(TAG, "t_stop: " "%" PRIu64 " s\r\n",t_stop);
-	}
-	else
-	{
-		t_stop =  (uint64_t)round(rtc_time_get());
-		tp = 0;
-	}
-
-	ESP_LOGW(TAG, "tp: %d sec\r\n", tp);
-	if(180 > acc_counter)
-	{
-		t_acc = 180 - acc_counter;
-	}
-	else t_acc = 0;
-	ESP_LOGW(TAG, "t_acc: %d sec\r\n",(int) t_acc);
-	if((t_acc + 35) < tp &&  Flag_motion_detected == true)
-	{
-		Flag_acc_wake = true;
-		 Flag_period_wake = false;
-		 ESP_LOGW(TAG, "Enter to deep sleep mode, wake by timer in %d sec\r\n",(int) t_acc);
-		esp_sleep_enable_timer_wakeup(t_acc * 1000000);
-		acc_power_down();
-	}
-	if((t_acc + 35) >= tp && Flag_motion_detected == true)
-	{
-		ESP_LOGW(TAG, "Enter to deep sleep mode, wake by timer in %d sec\r\n", tp);
-		Flag_period_wake = true;
-		Flag_acc_wake = false;
-		esp_sleep_enable_timer_wakeup(tp * 1000000);
-		acc_power_down();
-	}
-	if(Flag_button_do_nothing == true && Flag_motion_detected == true)
-	{
-		if((t_acc + 35) < tp &&  Flag_motion_detected == true) Flag_acc_wake = true;
-		if((t_acc + 35) >= tp && Flag_motion_detected == true) Flag_period_wake = true;
+		ESP_LOGW(TAG, "tp: %d sec\r\n", tp);
+		if(180 > acc_counter)
+		{
+			t_acc = 180 - acc_counter;
+		}
+		else t_acc = 0;
+		ESP_LOGW(TAG, "t_acc: %d sec\r\n",(int) t_acc);
+		if((t_acc + 35) < tp &&  Flag_motion_detected == true)
+		{
+			Flag_acc_wake = true;
+			 Flag_period_wake = false;
+			 ESP_LOGW(TAG, "Enter to deep sleep mode, wake by timer in %d sec\r\n",(int) t_acc);
+			esp_sleep_enable_timer_wakeup(t_acc * 1000000);
+			acc_power_down();
+		}
+		if((t_acc + 35) >= tp && Flag_motion_detected == true)
+		{
+			ESP_LOGW(TAG, "Enter to deep sleep mode, wake by timer in %d sec\r\n", tp);
+			Flag_period_wake = true;
+			Flag_acc_wake = false;
+			esp_sleep_enable_timer_wakeup(tp * 1000000);
+			acc_power_down();
+		}
+		if(Flag_button_do_nothing == true && Flag_motion_detected == true)
+		{
+			if((t_acc + 35) < tp &&  Flag_motion_detected == true) Flag_acc_wake = true;
+			if((t_acc + 35) >= tp && Flag_motion_detected == true) Flag_period_wake = true;
+		}
 	}
 	if((flag_end_motion == true || esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED || (Flag_button_do_nothing == true && Flag_motion_detected == false)))
 	{
@@ -250,18 +273,47 @@ void ESP_sleep(bool Turn_off_7070)
 	}
 	if((Flag_motion_detected == false))
 	{
-		esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+		uint64_t t_sleep_vol = 0;
+		uint64_t t_sleep_BU = 0;
+		t_total_passed_vol = t_total_passed_vol  + time_slept + TrackingRuntime;
+		ESP_LOGW(TAG, "t_total_passed: " "%" PRIu64 " s\r\n",t_total_passed_vol);
+		if(gpio_get_level(CHARGE) == 0)
+		{
+			if(10 * 60 > t_total_passed_vol) t_sleep_vol = (10 * 60 - t_total_passed_vol);
+			else t_sleep_vol = 0;
+			esp_sleep_enable_timer_wakeup(t_sleep_vol * 1000000);
+			ESP_LOGW(TAG, "Enter to deep sleep mode wake by timer in %"PRIu64": \r\n", t_sleep_vol);
+		}
+		else
+		{
+			if(12 * 3600 > t_total_passed_vol) t_sleep_vol = (12 * 3600 - t_total_passed_vol);
+			else t_sleep_vol = 0;
+			esp_sleep_enable_timer_wakeup(t_sleep_vol * 1000000);
+			ESP_LOGW(TAG, "Enter to deep sleep mode wake by timer in  %"PRIu64": \r\n", t_sleep_vol);
+		}
 		ESP_LOGW(TAG, "Enter to deep sleep mode wake by ACC\r\n");
 		acc_power_up();
 		esp_sleep_enable_ext0_wakeup(ACC_INT, 0);
-	}
-	//if backup array has DASP, wake up after 2minute to send backup array
-	for(int i = 0; i < Backup_Array_Counter; i++)
-	{
-		if((Retry_count < MAX_RETRY && Flag_motion_detected == false) && (strstr(Location_Backup_Array[i], "DOF") ||  strstr(Location_Backup_Array[i], "DBF") || strstr(Location_Backup_Array[i], "DASP")))
+		//if backup array has DASP, wake up after 2minute to send backup array
+		for(int i = 0; i < Backup_Array_Counter; i++)
 		{
-			esp_sleep_enable_timer_wakeup(5 * 1000000);
-			ESP_LOGW(TAG, "Enter to deep sleep mode, wake by timer in 5 sec\r\n");
+			if(Flag_motion_detected == false && (strstr(Location_Backup_Array[i], "DBF") || strstr(Location_Backup_Array[i], "DASP")))
+			{
+				t_total_passed_BU = t_total_passed_BU  + time_slept + TrackingRuntime;
+				ESP_LOGW(TAG, "t_total_passed_BU: " "%" PRIu64 " s\r\n",t_total_passed_BU);
+				if(Retry_count < MAX_RETRY)
+				{
+					esp_sleep_enable_timer_wakeup(5 * 1000000);
+					ESP_LOGW(TAG, "Enter to deep sleep mode, wake by timer in 5 sec\r\n");
+				}
+				else
+				{
+					if( 3600 > t_total_passed_BU) t_sleep_BU = (3600 - t_total_passed_BU);
+					else t_sleep_vol = 0;
+					esp_sleep_enable_timer_wakeup(t_sleep_BU * 1000000);
+					ESP_LOGW(TAG, "Enter to deep sleep mode, wake by timer in %"PRIu64"\r\n", t_sleep_BU);
+				}
+			}
 		}
 	}
 	if(gpio_get_level(CHARGE) == 0)
@@ -274,17 +326,13 @@ void ESP_sleep(bool Turn_off_7070)
 		esp_sleep_enable_ext1_wakeup((1ULL << BUTTON), ESP_EXT1_WAKEUP_ANY_HIGH);
 		ESP_LOGW(TAG, "Enter to deep sleep mode, wake by BUTTON\r\n");
 	}
-	if(strchr(Device_PairStatus,'U') || strlen(Device_PairStatus) == 0)
-	{
-		gpio_hold_dis(PowerLatch);
-		gpio_set_level(PowerLatch, 0);
-	}
 	if(Flag_reboot_7070 == true)
 	{
 		ESP_LOGW(TAG, "Shut down 7070\r\n");
 		gpio_hold_dis(VCC_7070_EN);
 		gpio_set_level(VCC_7070_EN, 0);
 	}
+	t_stop = (uint64_t)round(rtc_time_get());
 	t_stop_calib =  (uint64_t)round(rtc_time_get());
 	t_slept_calib = 0;
 	esp_task_wdt_reset();  		  //Comment this line to trigger a MWDT timeout

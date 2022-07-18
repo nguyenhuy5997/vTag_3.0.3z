@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/nguyenphuonglinh/Desktop/esp-idf/components/soc
+# Install script for directory: C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/components/soc
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,12 +34,12 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/Users/nguyenphuonglinh/.espressif/tools/xtensa-esp32-elf/esp-2021r1-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-objdump.exe")
+  set(CMAKE_OBJDUMP "C:/Users/ASUS/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch2-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-objdump.exe")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader/esp-idf/soc/esp32/cmake_install.cmake")
+  include("C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/bootloader/esp-idf/soc/esp32/cmake_install.cmake")
 
 endif()
 

@@ -1,13 +1,13 @@
 # Target labels
  bootloader
 # Source files and their labels
-C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/CMakeFiles/bootloader
-C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/CMakeFiles/bootloader.rule
-C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/CMakeFiles/bootloader-complete.rule
-C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
-C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
-C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
-C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
-C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
-C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
-C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
+C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/CMakeFiles/bootloader
+C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/CMakeFiles/bootloader.rule
+C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/CMakeFiles/bootloader-complete.rule
+C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule

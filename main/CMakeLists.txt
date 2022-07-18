@@ -1,4 +1,4 @@
-idf_component_register(SRCS "real_time_stats_example_main.c"
+idf_component_register(SRCS "main.c"
 							"GPS.c"
 							"AT_Function.c"
 							"MQTT.c"
@@ -25,7 +25,7 @@ set(ulp_s_sources "ulp/blink.S")
 #
 # 3. List all the component source files which include automatically
 #    generated ULP export file, ${ulp_app_name}.h:
-set(ulp_exp_dep_srcs "real_time_stats_example_main.c")
+set(ulp_exp_dep_srcs "main.c")
 #
 # 4. Call function to build ULP binary and embed in project using the argument
 #    values above.

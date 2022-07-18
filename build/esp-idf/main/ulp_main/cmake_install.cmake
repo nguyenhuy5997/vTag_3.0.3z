@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/nguyenphuonglinh/Desktop/esp-idf/components/ulp/cmake
+# Install script for directory: C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/components/ulp/cmake
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -34,7 +34,7 @@ endif()
 
 # Set default install directory permissions.
 if(NOT DEFINED CMAKE_OBJDUMP)
-  set(CMAKE_OBJDUMP "C:/Users/nguyenphuonglinh/.espressif/tools/esp32ulp-elf/2.28.51-esp-20191205/esp32ulp-elf-binutils/bin/esp32ulp-elf-objdump.exe")
+  set(CMAKE_OBJDUMP "C:/Users/ASUS/.espressif/tools/esp32ulp-elf/2.28.51-esp-20191205/esp32ulp-elf-binutils/bin/esp32ulp-elf-objdump.exe")
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/nguyenphuonglinh/Desktop/vtag/VTAG_ESP32_7070G_V3_S3.1.1/build/esp-idf/main/ulp_main/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/ASUS/.espressif/frameworks/esp-idf-v4.4/workspace/vTag_3.0.3z/build/esp-idf/main/ulp_main/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

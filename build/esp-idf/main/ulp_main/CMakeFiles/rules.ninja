@@ -25,7 +25,7 @@ rule ASM_COMPILER__ulp_main_
 # Rule for linking ASM executable.
 
 rule ASM_EXECUTABLE_LINKER__ulp_main_
-  command = cmd.exe /C "$PRE_LINK && C:\Users\nguyenphuonglinh\.espressif\tools\esp32ulp-elf\2.28.51-esp-20191205\esp32ulp-elf-binutils\bin\esp32ulp-elf-ld.exe $FLAGS $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
+  command = cmd.exe /C "$PRE_LINK && C:\Users\ASUS\.espressif\tools\esp32ulp-elf\2.28.51-esp-20191205\esp32ulp-elf-binutils\bin\esp32ulp-elf-ld.exe $FLAGS $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD"
   description = Linking ASM executable $TARGET_FILE
   restat = $RESTAT
 
@@ -42,7 +42,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = C:\Users\nguyenphuonglinh\.espressif\tools\cmake\3.20.3\bin\cmake.exe --regenerate-during-build -SC:\Users\nguyenphuonglinh\Desktop\esp-idf\components\ulp\cmake -BC:\Users\nguyenphuonglinh\Desktop\vtag\VTAG_ESP32_7070G_V3_S3.1.1\build\esp-idf\main\ulp_main
+  command = C:\Users\ASUS\.espressif\tools\cmake\3.20.3\bin\cmake.exe --regenerate-during-build -SC:\Users\ASUS\.espressif\frameworks\esp-idf-v4.4\components\ulp\cmake -BC:\Users\ASUS\.espressif\frameworks\esp-idf-v4.4\workspace\vTag_3.0.3z\build\esp-idf\main\ulp_main
   description = Re-running CMake...
   generator = 1
 
@@ -51,7 +51,7 @@ rule RERUN_CMAKE
 # Rule for cleaning all built files.
 
 rule CLEAN
-  command = C:\Users\nguyenphuonglinh\.espressif\tools\ninja\1.10.2\ninja.exe $FILE_ARG -t clean $TARGETS
+  command = C:\Users\ASUS\.espressif\tools\ninja\1.10.2\ninja.exe $FILE_ARG -t clean $TARGETS
   description = Cleaning all built files...
 
 
@@ -59,6 +59,6 @@ rule CLEAN
 # Rule for printing all primary targets available.
 
 rule HELP
-  command = C:\Users\nguyenphuonglinh\.espressif\tools\ninja\1.10.2\ninja.exe -t targets
+  command = C:\Users\ASUS\.espressif\tools\ninja\1.10.2\ninja.exe -t targets
   description = All primary targets available:
 

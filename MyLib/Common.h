@@ -69,7 +69,7 @@ extern RTC_DATA_ATTR char VTAG_Vesion[10];
 extern RTC_DATA_ATTR char VTAG_Version_next[10];
 
 #define CALIB_FACTOR	1.048
-#define BU_Arr_Max_Num 		 	15
+#define BU_Arr_Max_Num 	15
 #define INNOWAY_LIVE	1
 #define INNOWAY_TEST 	0
 #define SERVER_TEST 	0
@@ -207,7 +207,7 @@ typedef void (*SIMCOM_SendATCallBack_t)(SIMCOM_ResponseEvent_t event, void *Resp
 //#define Device_ID_TW			"ee5db00a-b105-49cf-aeab-c4d0a34bc7e9"									// TW_5
 #define Device_ID_TW			"MAN02ND00073"									// TW_KIT
 
-#define MQTT_TX_Str_Buf_Lenght	500
+#define MQTT_TX_Str_Buf_Lenght	1000
 
 typedef enum
 {
