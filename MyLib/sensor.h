@@ -136,5 +136,5 @@ static void enter_deep_sleep(int wake_pin);
 static void IRAM_ATTR gpio_isr_handler(void* arg);
 static void check_motion(void* arg);
 void gpio_init(void);
-void acc_config(void);
+void acc_config(uint8_t gain, uint16_t thres);
 #endif /* MAIN_INCLUDE_SENSOR_H_ */

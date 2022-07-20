@@ -63,6 +63,7 @@ extern bool Flag_wifi_got_led;
 extern void JSON_Analyze(char* my_json_string, CFG* config);
 static const char *TAG = "MQTT_EXAMPLE";
 extern void ESP32_Clock_Config(int Freq_Max, int Freq_Min, bool LighSleep_Select);
+esp_err_t advanced_ota_example_task(esp_http_client_config_t ota_client_config);
 bool Flag_cancel_timeout = false;
 bool step_get = false;
 bool flag_get_token = true;
@@ -289,7 +290,10 @@ static void check_timeout(void *arg)
 		if(start_timeout == 0 && Flag_cancel_timeout == false)
 		{
 			esp_restart();
-//			forcedReset();
+		}
+		else if(start_timeout == 0)
+		{
+			vTaskDelete(NULL);
 		}
 	}
 }
@@ -401,7 +405,7 @@ void check_update_task(void *pvParameter)
 									.cert_pem = NULL,
 									.skip_cert_common_name_check = true
 								};
-								esp_err_t ret = esp_https_ota(&ota_client_config);
+								esp_err_t ret = advanced_ota_example_task(ota_client_config);
 								if (ret == ESP_OK)
 								{
 									esp_http_client_cleanup(client);
@@ -492,7 +496,7 @@ void check_update_task(void *pvParameter)
 										.cert_pem = NULL,
 										.skip_cert_common_name_check = true
 									};
-									esp_err_t ret = esp_https_ota(&ota_client_config);
+									esp_err_t ret = advanced_ota_example_task(ota_client_config);
 									if (ret == ESP_OK)
 									{
 										esp_http_client_cleanup(client_aws);
@@ -541,7 +545,90 @@ void check_update_task(void *pvParameter)
 			}
 	    }
 }
+static esp_err_t validate_image_header(esp_app_desc_t *new_app_info)
+{
+    if (new_app_info == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
 
+    const esp_partition_t *running = esp_ota_get_running_partition();
+    esp_app_desc_t running_app_info;
+    if (esp_ota_get_partition_description(running, &running_app_info) == ESP_OK) {
+        ESP_LOGI(TAG, "Running firmware version: %s", running_app_info.version);
+    }
+    return ESP_OK;
+}
+esp_err_t advanced_ota_example_task(esp_http_client_config_t ota_client_config)
+{
+    ESP_LOGI(TAG, "Starting Advanced OTA example");
+    int total_size_ota = 0;
+    int threshold_percent = 0;
+    esp_err_t ota_finish_err = ESP_OK;
+    esp_http_client_config_t config = {
+        .url = ota_client_config.url,
+		.skip_cert_common_name_check = true,
+		.cert_pem = NULL,
+    };
+
+    esp_https_ota_config_t ota_config = {
+        .http_config = &config,
+    };
+
+    esp_https_ota_handle_t https_ota_handle = NULL;
+    esp_err_t err = esp_https_ota_begin(&ota_config, &https_ota_handle);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "ESP HTTPS OTA Begin failed");
+        return ESP_FAIL;
+    }
+    total_size_ota = esp_https_ota_get_image_size(https_ota_handle);
+    esp_app_desc_t app_desc;
+    err = esp_https_ota_get_img_desc(https_ota_handle, &app_desc);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "esp_https_ota_read_img_desc failed");
+        goto ota_end;
+    }
+    err = validate_image_header(&app_desc);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "image header verification failed");
+        goto ota_end;
+    }
+
+    while (1) {
+        err = esp_https_ota_perform(https_ota_handle);
+        if (err != ESP_ERR_HTTPS_OTA_IN_PROGRESS) {
+            break;
+        }
+//        ESP_LOGW(TAG, "Image bytes read: %d", esp_https_ota_get_image_len_read(https_ota_handle));
+        if(esp_https_ota_get_image_len_read(https_ota_handle) * 100/ total_size_ota >= threshold_percent)
+		{
+			threshold_percent = threshold_percent + 1;
+			ESP_LOGI(TAG, "Dowload: %d%%", esp_https_ota_get_image_len_read(https_ota_handle) * 100/ total_size_ota);
+		}
+    }
+
+    if (esp_https_ota_is_complete_data_received(https_ota_handle) != true) {
+        // the OTA image was not completely received and user can customise the response to this situation.
+        ESP_LOGE(TAG, "Complete data was not received.");
+    } else {
+        ota_finish_err = esp_https_ota_finish(https_ota_handle);
+        if ((err == ESP_OK) && (ota_finish_err == ESP_OK)) {
+            ESP_LOGI(TAG, "ESP_HTTPS_OTA upgrade successful. Rebooting ...");
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+            return ESP_OK;
+        } else {
+            if (ota_finish_err == ESP_ERR_OTA_VALIDATE_FAILED) {
+                ESP_LOGE(TAG, "Image validation failed, image is corrupted");
+            }
+            ESP_LOGE(TAG, "ESP_HTTPS_OTA upgrade failed 0x%x", ota_finish_err);
+            return ESP_FAIL;
+        }
+    }
+
+ota_end:
+    esp_https_ota_abort(https_ota_handle);
+    ESP_LOGE(TAG, "ESP_HTTPS_OTA upgrade failed");
+    return ESP_FAIL;
+}
 void ini_wifi()
 {
 	xTaskCreatePinnedToCore(check_timeout, "check_timeout", 4096, NULL, MAIN_TASK_PRIO, &time_out_handle, tskNO_AFFINITY);

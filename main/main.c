@@ -76,7 +76,7 @@ const char *TAG = "VTAG_ESP32";
 #define THRESHOLD   3970
 char MQTT_SubMessage[200] = "";
 
-RTC_DATA_ATTR char VTAG_Vesion[10]		    =		"S3.1.3";
+RTC_DATA_ATTR char VTAG_Vesion[10]		    =		"S3.2.0";
 RTC_DATA_ATTR char VTAG_Version_next[10] 	=		{0};
 
 RTC_DATA_ATTR char DeviceID_TW_Str[50]= "";
@@ -201,6 +201,7 @@ bool Flag_need_check_accuracy = false;
 bool Flag_motion_acc_wake_check = false;
 bool Flag_new_firmware_led = false;
 bool Flag_location_send = false;
+bool Flag_skip_rst_acc_ISR = false;
 //--------------------------------------------------------------------------------------------------------------//
 //uint8_t VTAG_TrackingMode = 0;
 //uint32_t VTAG_TrackingPeriod = 0;
@@ -4561,6 +4562,7 @@ void led_indicator(void *arg)
     	//wake up and wait 30s to check wherether there is motion
     	if(Flag_acc_wake == true && Flag_motion_detected == true)
     	{
+    		Flag_skip_rst_acc_ISR = true;
     		Flag_mainthread_run = true;
     		Flag_acc_wake = false;
     		while(TrackingRuntime < 30 && Flag_sos == false && Flag_Unpair_Task == false && Flag_motion_acc_wake_check == false)
@@ -5311,7 +5313,7 @@ void app_main(void)
 	Bat_ADC_Init();
 
 	i2c_master_init();
-	acc_config();
+	acc_config(40, 2);
 	gpio_init();
 	rtc_config_t rtc_configure =
 	{

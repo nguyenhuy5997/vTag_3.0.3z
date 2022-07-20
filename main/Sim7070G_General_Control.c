@@ -1,9 +1,3 @@
-/*
- * Sim7070G_General_Control.c
- *
- *  Created on: Aug 25, 2021
- *      Author: QuangDan
- */
 #include "../MyLib/Sim7070G_General_Control.h"
 #include "../MyLib/ESP32_GPIO.h"
 #include "../MyLib/sensor.h"
@@ -339,6 +333,3 @@ void ESP_sleep(bool Turn_off_7070)
 	esp_set_deep_sleep_wake_stub(&wake_stub);
 	esp_deep_sleep_start();
 }
-
-
-
